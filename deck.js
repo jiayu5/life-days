@@ -62,6 +62,8 @@ export function mountDeck(rail, track, showGalleryYear) {
 
     for (const { node, center } of cards) {
       const distance = (center - middle) / spacing;
+      const lightDistance = (center - (rail.scrollLeft + width * .44)) / (width * .26);
+      node.style.setProperty('--light', Math.exp(-(lightDistance ** 2)).toFixed(3));
       const angle = Math.atan(distance * .83);
       const depth = 1 - Math.cos(angle);
       node.style.setProperty('--rise', (-depth * 48).toFixed(2) + 'px');
