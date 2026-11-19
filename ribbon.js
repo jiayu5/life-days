@@ -1,4 +1,5 @@
 const TAU = Math.PI * 2;
+const timelineBand = 3;
 const bands = [
   ['#fa8f79', '#ffac94', '#f86e67'],
   ['#fdce50', '#ffe193', '#ffac67'],
@@ -23,17 +24,53 @@ export function mountRibbon(canvas, rail) {
   let pressed = 0;
   let impulse = 0;
   let gradients = [];
+  let stops = [];
+  let scrollPosition = 0;
+  const track = rail.querySelector('.track');
+
+  function measureStops() {
+    stops = Array.from(track.children, node => ({
+      node,
+      x: node.offsetLeft + node.offsetWidth / 2,
+    }));
+    schedule();
+  }
 
   function point(x, band, edge) {
     const unit = x / width;
-    const scroll = rail.scrollLeft * .003;
+    const scroll = scrollPosition * .003;
     const distance = (unit - motion.x) * 3.8;
     const influence = Math.exp(-distance * distance) * motion.strength;
     const base = Math.sin(unit * TAU * 1.22 - phase + scroll) * .12;
     const bow = influence * (motion.y * .36 + .08);
     const ripple = impulse * Math.sin(distance * 5 - phase * 15) * influence * .12;
-    const twist = Math.sin(unit * 7.6 - phase * .9 + band * .72 + scroll + influence);
-    return height * (.50 + base + bow + ripple + (band - 1.5) * .034 + twist * (.065 + band * .012) + edge * (.074 + .026 * twist));
+    const angle = unit * 7.6 - phase * .9 + scroll + influence;
+    const reference = .051 + Math.sin(angle + timelineBand * .72) * .101;
+    const margin = Math.min(.44, Math.max(.26, 102 / height));
+    const center = Math.max(margin, Math.min(1 - margin, .50 + base + bow + ripple + reference));
+    const twist = Math.sin(angle + band * .72);
+    const offset = (band - 1.5) * .034 + twist * (.065 + band * .012);
+    return height * (center + offset - reference + edge * (.074 + .026 * twist));
+  }
+
+  function drawTimeline(step, count) {
+    const centerAt = x => point(x, timelineBand, 0);
+    context.beginPath();
+    context.moveTo(0, centerAt(0));
+    for (let index = 1; index <= count; index++) {
+      const x = index * step;
+      context.lineTo(x, centerAt(x));
+    }
+    context.lineWidth = 2;
+    context.strokeStyle = '#fff8ebaa';
+    context.stroke();
+
+    for (const { node, x } of stops) {
+      const localX = x - scrollPosition;
+      if (localX < -150 || localX > width + 150) continue;
+      const rise = centerAt(localX) - height / 2;
+      node.style.setProperty('--curve-offset', `${rise.toFixed(2)}px`);
+    }
   }
 
   function draw(time) {
@@ -49,6 +86,7 @@ export function mountRibbon(canvas, rail) {
       impulse += (pressed - impulse) * ease;
       pressed *= Math.pow(.91, dt);
     }
+    scrollPosition = rail.scrollLeft;
     context.clearRect(0, 0, width, height);
     const count = Math.ceil(width / 9);
     const step = width / count;
@@ -69,6 +107,7 @@ export function mountRibbon(canvas, rail) {
         context.stroke();
       }
     }
+    drawTimeline(step, count);
     if (!reduced.matches) {
       drawStreaks();
       schedule();
@@ -117,8 +156,10 @@ export function mountRibbon(canvas, rail) {
       gradient.addColorStop(1, colors[2]);
       return gradient;
     });
-    schedule();
+    measureStops();
   }).observe(canvas);
+  new ResizeObserver(measureStops).observe(track);
+  new MutationObserver(measureStops).observe(track, { childList: true });
 
   new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;

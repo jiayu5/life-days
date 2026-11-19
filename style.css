@@ -51,11 +51,7 @@ a { color: inherit; text-decoration: none }
 #ribbon { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
 .rail { flex: 1; min-width: 0; display: flex; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth }
 .track { flex: none; display: flex; min-width: 100%; width: max-content; list-style: none; position: relative; margin: 0; padding: 0 clamp(16px, 5vw, 80px); isolation: isolate }
-.track::before {
-  content: ""; position: absolute; pointer-events: none;
-  inset: 50% 0 auto; height: 1px; background: #33255b65; z-index: -1;
-}
-.stop { --marker: #ffb293; flex: 1 0 clamp(160px, 18vw, 270px); min-width: 0; position: relative; display: grid; place-items: center }
+.stop { --curve-offset: 0px; --marker: #ffb293; flex: 1 0 clamp(160px, 18vw, 270px); min-width: 0; position: relative; display: grid; place-items: center }
 .stop[data-tone="1"] { --marker: #ffd76e }
 .stop[data-tone="2"] { --marker: #cdb6ff }
 .stop[data-tone="3"] { --marker: #bcebd0 }
@@ -64,23 +60,25 @@ a { color: inherit; text-decoration: none }
 .stop button:focus-visible .pin { outline: 2px solid var(--violet); outline-offset: 4px }
 .pin {
   position: relative; display: grid; place-items: center;
+  translate: 0 var(--curve-offset);
   width: 35px; height: 35px; border-radius: 50%; background: #fffaf3;
   border: 1px solid #30223f; box-shadow: 0 4px 0 #30223f;
   transition: transform .42s cubic-bezier(.18,1.55,.36,1), background-color .2s, box-shadow .2s;
 }
 .pin::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); transition: transform .3s }
-.stop button:is(:hover,:focus-visible) .pin { transform: translateY(-7px) scale(1.34) rotate(-12deg); background: var(--marker); box-shadow: 0 6px 0 #30223f }
+.stop button:is(:hover,:focus-visible) .pin { transform: scale(1.24); background: var(--marker); box-shadow: 0 6px 0 #30223f }
 .stop button:is(:hover,:focus-visible) .pin::before { transform: scale(1.45) }
-.stop button:active .pin { transform: translateY(3px) scale(.92); box-shadow: 0 1px 0 #30223f }
+.stop button:active .pin { transform: scale(.92); box-shadow: 0 1px 0 #30223f }
 .marker-label {
-  position: absolute; top: calc(50% + clamp(58px, 10vh, 108px)); inset-inline: 12px;
+  position: absolute; top: calc(50% + clamp(40px, 7vh, 68px)); inset-inline: 12px;
+  translate: 0 var(--curve-offset);
   justify-self: center; max-width: calc(100% - 20px); display: grid; gap: 3px;
   padding: 8px 15px; border-radius: 14px; border: 1px solid #30223f2b;
   background: #fffcf4; box-shadow: 0 3px 0 #30223f24;
   transition: transform .4s cubic-bezier(.18,1.45,.36,1), background-color .2s;
 }
 .stop button:is(:hover,:focus-visible) .marker-label { transform: translateY(-5px) rotate(-3deg); background: var(--marker) }
-.stop:nth-child(even) .marker-label { top: auto; bottom: calc(50% + clamp(58px, 10vh, 108px)) }
+.stop:nth-child(even) .marker-label { top: auto; bottom: calc(50% + clamp(40px, 7vh, 68px)) }
 .marker-label time, #detail-date, #detail-count { font-family: "SFMono-Regular", Consolas, monospace; font-variant-numeric: tabular-nums }
 .marker-label time { color: #514660; font-size: 13px }
 .marker-name { font-size: 18px; font-weight: 760; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
