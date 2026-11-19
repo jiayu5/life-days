@@ -1,5 +1,6 @@
 import { today, duration } from './dates.js';
 import { mountDeck } from './deck.js';
+import { attachInk } from './ink.js';
 
 const byId = id => document.getElementById(id);
 const dialog = byId('editor');
@@ -157,6 +158,7 @@ function render() {
     artwork.append(element('span', event.day.slice(8), 'cover-day'));
     button.append(dateLabel, artwork, element('span', event.title, 'card-title'), byId('selection-ink').content.cloneNode(true));
     row.append(button);
+    attachInk(button, event.id);
     return row;
   }));
   if (oldFocus) markerButtons.get(oldFocus)?.focus({ preventScroll: true });

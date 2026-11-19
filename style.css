@@ -101,30 +101,16 @@ a { color: inherit; text-decoration: none }
   pointer-events: none; overflow: visible; opacity: 0; transition: opacity .2s;
 }
 .selection-ink path {
-  --ink-start: 0;
-  fill: none; stroke: #231e1b; stroke-width: 2.05; stroke-linecap: round; stroke-linejoin: round;
-  vector-effect: non-scaling-stroke; stroke-dasharray: .83 .17;
-  stroke-dashoffset: var(--ink-start);
-  animation: orbit-ink 3.1s linear infinite paused;
-}
-.selection-ink path + path {
-  --ink-start: -.54;
-  stroke-width: 1.55;
-  stroke-dasharray: .39 .61;
-}
-@keyframes orbit-ink {
-  to { stroke-dashoffset: calc(var(--ink-start) - 1) }
+  fill: none; stroke: #231e1b; stroke-width: 1.85; stroke-linecap: round; stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
 }
 .day-card:focus-visible { outline-offset: 6px }
 .day-card:focus-visible .selection-ink { opacity: 1 }
-.day-card:focus-visible .selection-ink path { animation-play-state: running }
 .stop:focus-within .day-card:focus-visible { transform: translateY(-20px) scale(1.08); box-shadow: 0 3px 0 #282b24, 0 24px 44px #272d2648 }
 @media (hover: hover) and (pointer: fine) {
   .stop:hover .day-card { transform: perspective(660px) translateY(-24px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) scale(1.1); transition-duration: .23s; box-shadow: 0 3px 0 #282b24, 0 24px 44px #272d2648 }
   .stop:hover .selection-ink { opacity: 1 }
-  .stop:hover .selection-ink path { animation-play-state: running }
   .rail.dragging .selection-ink { opacity: 0 }
-  .rail.dragging .selection-ink path { animation-play-state: paused }
   .stop:hover .cover-day { transform: scale(1.055) }
   .rail.dragging .stop:hover .day-card { transform: none }
 }
