@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
-  --paper: #f8f7f2;
-  --ink: #222027;
+  --paper: #f4f2e9;
+  --ink: #242822;
   --muted: #625a6c;
   --rule: #26212c24;
   --violet: #6846e5;
@@ -42,50 +42,63 @@ a { color: inherit; text-decoration: none }
   padding: 9px 14px; border-radius: 16px; background: var(--paper); color: var(--ink);
 }
 .timeline-stage {
-  position: relative; isolation: isolate; display: flex; align-items: stretch;
+  --card-width: min(clamp(182px, 25vw, 298px), 46dvh);
+  --card-height: calc(var(--card-width) * 1.26);
+  position: relative; isolation: isolate; display: flex;
   height: 100vh; height: 100dvh; width: 100%; overflow: hidden;
-  background-color: #f1ebff;
-  background-image: radial-gradient(circle, #74689438 .8px, transparent 1.2px), radial-gradient(ellipse at 3% 8%, #fff9e2, transparent 62%), radial-gradient(ellipse at 100% 100%, #fccde6, transparent 65%);
-  background-size: 20px 20px, auto, auto;
+  background: radial-gradient(ellipse at 50% 48%, #fffdf2 0%, #efeee1 59%, #e2e7d8 100%);
 }
-#ribbon { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
-.rail { flex: 1; min-width: 0; display: flex; overflow-x: auto; scrollbar-width: none; scroll-behavior: smooth }
-.track { flex: none; display: flex; min-width: 100%; width: max-content; list-style: none; position: relative; margin: 0; padding: 0 clamp(16px, 5vw, 80px); isolation: isolate }
-.stop { --curve-offset: 0px; --marker: #ffb293; flex: 1 0 clamp(160px, 18vw, 270px); min-width: 0; position: relative; display: grid; place-items: center }
-.stop[data-tone="1"] { --marker: #ffd76e }
-.stop[data-tone="2"] { --marker: #cdb6ff }
-.stop[data-tone="3"] { --marker: #bcebd0 }
-.stop button, .now { position: relative; height: 100%; width: 100%; padding: 0; border: 0; background: none; display: grid; place-items: center; text-align: center }
-.stop button:focus-visible { outline: none }
-.stop button:focus-visible .pin { outline: 2px solid var(--violet); outline-offset: 4px }
-.pin {
-  position: relative; display: grid; place-items: center;
-  translate: 0 var(--curve-offset);
-  width: 35px; height: 35px; border-radius: 50%; background: #fffaf3;
-  border: 1px solid #30223f; box-shadow: 0 4px 0 #30223f;
-  transition: transform .42s cubic-bezier(.18,1.55,.36,1), background-color .2s, box-shadow .2s;
+#deck-curve { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
+.rail { flex: 1; min-width: 0; display: flex; overflow: auto hidden; scrollbar-width: none; overscroll-behavior-x: contain }
+.rail:focus-visible { outline-offset: -5px }
+.track {
+  flex: none; position: relative; display: flex; align-items: center; gap: clamp(22px, 3vw, 54px);
+  width: max-content; min-width: 100%; list-style: none; margin: 0;
+  padding: 0 max(0px, calc((100vw - var(--card-width)) / 2));
 }
-.pin::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); transition: transform .3s }
-.stop button:is(:hover,:focus-visible) .pin { transform: scale(1.24); background: var(--marker); box-shadow: 0 6px 0 #30223f }
-.stop button:is(:hover,:focus-visible) .pin::before { transform: scale(1.45) }
-.stop button:active .pin { transform: scale(.92); box-shadow: 0 1px 0 #30223f }
-.marker-label {
-  position: absolute; top: calc(50% + clamp(40px, 7vh, 68px)); inset-inline: 12px;
-  translate: 0 var(--curve-offset);
-  justify-self: center; max-width: calc(100% - 20px); display: grid; gap: 3px;
-  padding: 8px 15px; border-radius: 14px; border: 1px solid #30223f2b;
-  background: #fffcf4; box-shadow: 0 3px 0 #30223f24;
-  transition: transform .4s cubic-bezier(.18,1.45,.36,1), background-color .2s;
+.stop {
+  --rise: 0px; --lean: 0deg; --cover: #f5ca57; --disc: #252b24; --label: #f8edc1;
+  flex: 0 0 var(--card-width); position: relative;
+  width: var(--card-width); height: var(--card-height); transform: translateY(var(--rise)) rotate(var(--lean));
 }
-.stop button:is(:hover,:focus-visible) .marker-label { transform: translateY(-5px) rotate(-3deg); background: var(--marker) }
-.stop:nth-child(even) .marker-label { top: auto; bottom: calc(50% + clamp(40px, 7vh, 68px)) }
-.marker-label time, #detail-date, #detail-count { font-family: "SFMono-Regular", Consolas, monospace; font-variant-numeric: tabular-nums }
-.marker-label time { color: #514660; font-size: 13px }
-.marker-name { font-size: 18px; font-weight: 760; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-.now .pin { width: 24px; height: 24px; background: #f8f3ff; box-shadow: none; border: 1px dashed #3b3057 }
-.now .pin::before { width: 5px; height: 5px; background: #6846e5 }
-.now .marker-label { background: #f8f3ff; box-shadow: none }
-.now .marker-name { color: #514660; font-weight: 650 }
+.stop[data-tone="1"] { --cover: #f0a1a3; --disc: #692c46; --label: #fff1da }
+.stop[data-tone="2"] { --cover: #c1b5f6; --disc: #3e3585; --label: #e7dfff }
+.stop[data-tone="3"] { --cover: #b8d599; --disc: #284b3a; --label: #e6efcc }
+.stop:is(:hover,:focus-within) { z-index: 1 }
+.day-card {
+  text-align: left; position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
+  justify-content: space-between; gap: 8px; padding: clamp(11px, 1.6vw, 22px);
+  border: 1px solid #252b2436; border-radius: 12px; background: var(--cover); overflow: hidden;
+  box-shadow: 0 2px 0 #262b22, 0 12px 25px #272d2633;
+  transition: transform .38s cubic-bezier(.19,1,.22,1), box-shadow .38s ease;
+}
+.day-card::after {
+  content: ""; pointer-events: none; position: absolute; inset: 0;
+  border-radius: inherit; box-shadow: inset 3px 0 #fff6, inset 5px 0 #28231d19;
+}
+.day-card time, #detail-date, #detail-count {
+  font-family: "SFMono-Regular", Consolas, monospace; font-variant-numeric: tabular-nums;
+}
+.day-card time { font-size: clamp(13px, 1.3vw, 17px); line-height: 1; letter-spacing: -.04em }
+.card-title {
+  font-size: clamp(19px, 2.6vw, 37px); line-height: 1.08; font-weight: 820; letter-spacing: -.055em;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
+}
+.cover-art {
+  width: 79%; aspect-ratio: 1; flex: 0 1 auto; max-height: 66%; align-self: center; display: grid; place-items: center;
+  border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 3px, #fff3 4px, transparent 5px 6px), var(--disc);
+  box-shadow: 0 4px 10px #221f274a; rotate: -13deg; transition: rotate .55s cubic-bezier(.19,1,.22,1);
+}
+.record-label {
+  display: grid; place-items: center; border-radius: 50%; width: 44%; aspect-ratio: 1;
+  color: #262720; background: var(--label); font: italic 700 clamp(20px, 4.4vw, 60px)/1 Georgia, serif;
+}
+.day-card:focus-visible { outline-offset: 6px }
+.stop:focus-within .day-card:focus-visible { transform: translateY(-20px) scale(1.08); box-shadow: 0 3px 0 #282b24, 0 24px 44px #272d2648 }
+@media (hover: hover) and (pointer: fine) {
+  .stop:hover .day-card { transform: translateY(-24px) scale(1.1); box-shadow: 0 3px 0 #282b24, 0 24px 44px #272d2648 }
+  .stop:hover .cover-art { rotate: 10deg }
+}
 #rail-controls {
   position: absolute; z-index: 1; right: max(clamp(18px, 4vw, 56px), env(safe-area-inset-right));
   bottom: max(20px, env(safe-area-inset-bottom)); display: flex; gap: 8px;
@@ -94,13 +107,13 @@ a { color: inherit; text-decoration: none }
 #rail-controls button:hover:not(:disabled) { border-color: var(--violet); color: var(--violet) }
 
 #detail {
-  --detail-ink: #211b28; --scene: #fed866;
+  --detail-ink: #211b28; --scene: #f5ca57;
   inset: 0; margin: 0; padding: 0; width: 100%; max-width: none; height: 100%; max-height: none;
   border: 0; background: var(--scene); color: var(--detail-ink); overscroll-behavior: contain;
 }
-#detail[data-palette="1"] { --scene: #f5b9d9 }
-#detail[data-palette="2"] { --scene: #c8b6ff }
-#detail[data-palette="3"] { --scene: #bfe7d1 }
+#detail[data-palette="1"] { --scene: #f0a1a3 }
+#detail[data-palette="2"] { --scene: #c1b5f6 }
+#detail[data-palette="3"] { --scene: #b8d599 }
 #detail-year { position: fixed; right: -.03em; bottom: -.23em; color: #211b2813; font: 900 clamp(140px, 38vw, 530px)/1 Arial, sans-serif; letter-spacing: -.11em; pointer-events: none; user-select: none }
 #detail::backdrop { background: transparent }
 #detail :focus-visible, #editor :focus-visible { outline-color: #3746b4 }
@@ -129,11 +142,14 @@ textarea { resize: vertical }
 .primary { margin-left: auto; color: var(--paper); background: #212756; border-color: #212756 }
 @media (max-width: 650px) {
   .detail-page { width: calc(100% - 40px) }
-  .track { padding-inline: 8px }
-  .stop { flex-basis: 128px }
-  .marker-label { inset-inline: 8px; padding-inline: 9px }
-  .marker-name { font-size: 16px }
+  .timeline-stage { --card-width: min(55vw, 46dvh) }
   #detail-title { font-size: clamp(43px, 11vw, 72px) }
+}
+@media (max-height: 450px) {
+  .cover-art { width: 55%; max-height: 55% }
+  .day-card { padding: 9px; gap: 4px }
+  .card-title { font-size: clamp(14px, 6dvh, 23px) }
+  .record-label { font-size: clamp(15px, 7dvh, 30px) }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important }

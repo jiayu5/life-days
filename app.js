@@ -1,5 +1,5 @@
 import { today, duration } from './dates.js';
-import { mountRibbon } from './ribbon.js';
+import { mountDeck } from './deck.js';
 
 const byId = id => document.getElementById(id);
 const dialog = byId('editor');
@@ -42,7 +42,7 @@ function edit(event = null) {
 const detail = byId('detail');
 const rail = byId('rail');
 const track = byId('events');
-mountRibbon(byId('ribbon'), rail);
+mountDeck(byId('deck-curve'), rail, track);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let activeId = null;
 let reveal = null;
@@ -53,7 +53,7 @@ let markerButtons = new Map();
 function fillDetail(event) {
   const elapsed = duration(event.day, today());
   byId('detail-year').textContent = event.day.slice(0, 4);
-  detail.dataset.palette = event.id === 'birthday' ? '0' : String(Number(event.day.slice(5, 7)) % 4);
+  detail.dataset.palette = String(palette(event));
   byId('detail-date').dateTime = event.day;
   byId('detail-date').textContent = event.day.replaceAll('-', '.');
   byId('detail-title').textContent = event.title;
@@ -64,18 +64,17 @@ function fillDetail(event) {
 }
 
 function showDetail(event) {
-  const pin = markerButtons.get(event.id).querySelector('.pin').getBoundingClientRect();
-  const x = pin.left + pin.width / 2;
-  const y = pin.top + pin.height / 2;
-  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const card = markerButtons.get(event.id).getBoundingClientRect();
+  const insets = [card.top, innerWidth - card.right, innerHeight - card.bottom, card.left];
+  const origin = insets.map(value => Math.max(0, value) + 'px').join(' ');
   activeId = event.id;
   fillDetail(event);
   detail.scrollTop = 0;
   detail.showModal();
   if (!reducedMotion.matches && typeof detail.animate === 'function') {
     reveal = detail.animate([
-      { clipPath: `circle(9px at ${x}px ${y}px)` },
-      { clipPath: `circle(${radius + 8}px at ${x}px ${y}px)` },
+      { clipPath: 'inset(' + origin + ' round 12px)' },
+      { clipPath: 'inset(0px 0px 0px 0px round 0px)' },
     ], { duration: 680, easing: 'cubic-bezier(.19,1,.22,1)' });
     detailAnimations = [...detail.querySelectorAll('.detail-content > *, #detail-year')].map((node, index) => node.animate([
       { opacity: 0, translate: '0 34px' },
@@ -131,30 +130,33 @@ new ResizeObserver(updateRailControls).observe(rail);
 byId('back').addEventListener('click', () => rail.scrollBy({ left: -rail.clientWidth * .72 }));
 byId('forward').addEventListener('click', () => rail.scrollBy({ left: rail.clientWidth * .72 }));
 
+function palette(event) {
+  return [...event.id].reduce((sum, character) => sum + character.charCodeAt(0), 0) % 4;
+}
+
 function render() {
   const date = today();
-  const stops = [...events, { title: '今天', day: date }].sort((a, b) => a.day.localeCompare(b.day));
+  const stops = [...events].sort((a, b) => a.day.localeCompare(b.day));
   const oldFocus = [...markerButtons].find(([, button]) => button === document.activeElement)?.[0];
   markerButtons = new Map();
-  byId('status').hidden = true;
-  track.replaceChildren(...stops.map((event, index) => {
+  byId('status').textContent = stops.length ? '' : '点击 Add，记下第一个大日子。';
+  byId('status').hidden = stops.length > 0;
+  track.replaceChildren(...stops.map(event => {
     const row = element('li', '', 'stop');
-    row.dataset.tone = index % 4;
-    const label = element('span', '', 'marker-label');
+    row.dataset.tone = palette(event);
+    const button = element('button', '', 'day-card');
+    button.type = 'button';
+    button.setAttribute('aria-haspopup', 'dialog');
+    button.addEventListener('click', () => showDetail(event));
+    markerButtons.set(event.id, button);
+
     const dateLabel = element('time', event.day.replaceAll('-', '.'));
     dateLabel.dateTime = event.day;
-    label.append(dateLabel, element('span', event.title, 'marker-name'));
-    const pin = element('span', '', 'pin');
-    pin.setAttribute('aria-hidden', 'true');
-    const marker = event.id ? element('button', '') : element('div', '', 'now');
-    if (event.id) {
-      marker.type = 'button';
-      marker.setAttribute('aria-haspopup', 'dialog');
-      marker.addEventListener('click', () => showDetail(event));
-      markerButtons.set(event.id, marker);
-    }
-    marker.append(pin, label);
-    row.append(marker);
+    const artwork = element('span', '', 'cover-art');
+    artwork.setAttribute('aria-hidden', 'true');
+    artwork.append(element('span', event.day.slice(8), 'record-label'));
+    button.append(dateLabel, artwork, element('span', event.title, 'card-title'));
+    row.append(button);
     return row;
   }));
   if (oldFocus) markerButtons.get(oldFocus)?.focus({ preventScroll: true });
