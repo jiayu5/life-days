@@ -8,7 +8,8 @@ export default {
     if (url.pathname !== '/api/events') {
       const asset = Object.hasOwn(assets, url.pathname) ? assets[url.pathname] : null;
       if (!asset) return new Response('页面不存在', { status: 404 });
-      return new Response(asset.body, {
+      const body = asset.base64 ? Uint8Array.from(atob(asset.base64), character => character.charCodeAt(0)) : asset.body;
+      return new Response(body, {
         headers: { 'Content-Type': asset.type, 'Cache-Control': 'no-cache', 'X-Content-Type-Options': 'nosniff' },
       });
     }

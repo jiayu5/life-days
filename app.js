@@ -172,7 +172,6 @@ function render() {
   byId('status').hidden = stops.length > 0;
   track.replaceChildren(...stops.map(event => {
     const row = element('li', '', 'stop');
-    row.dataset.tone = palette(event);
     row.dataset.year = event.day.slice(0, 4);
     const button = element('button', '', 'day-card');
     button.type = 'button';
