@@ -28,22 +28,31 @@ function sampleStroke(path, random) {
   });
 }
 
-function coordinate(points, position) {
-  const index = Math.floor(position);
-  const lower = points[index % sampleCount];
-  const upper = points[(index + 1) % sampleCount];
-  const fraction = position - index;
-  return lower.map((value, axis) => (value + (upper[axis] - value) * fraction).toFixed(2)).join(' ');
-}
-
-function trace(points, phase, span) {
-  const start = (phase % 1) * sampleCount;
-  const end = start + span * sampleCount;
-  let commands = 'M' + coordinate(points, start);
-  for (let index = Math.floor(start) + 1; index < end; index++) {
-    commands += 'L' + points[index % sampleCount].map(value => value.toFixed(2)).join(' ');
+function brushOutline(points, phase, span, lane, weight, grain) {
+  const leading = [];
+  const trailing = [];
+  const segments = Math.ceil(span * sampleCount);
+  for (let step = 0; step <= segments; step++) {
+    const progress = step / segments;
+    const position = ((phase + progress * span) % 1) * sampleCount;
+    const index = Math.floor(position);
+    const fraction = position - index;
+    const here = points[index];
+    const next = points[(index + 1) % sampleCount];
+    const x = here[0] + (next[0] - here[0]) * fraction;
+    const y = here[1] + (next[1] - here[1]) * fraction;
+    const dx = x - 50;
+    const dy = y - 50;
+    const radius = Math.hypot(dx, dy) || 1;
+    const pressure = .48 + .52 * (.5 + .5 * Math.sin(progress * turn * 1.35 + grain));
+    const taper = Math.min(1, Math.sqrt(progress * 14), Math.sqrt((1 - progress) * 14));
+    const halfWidth = .045 + weight * pressure * taper;
+    const edge = distance => (x + dx / radius * distance).toFixed(2) + ' ' +
+      (y + dy / radius * distance).toFixed(2);
+    leading.push(edge(lane + halfWidth));
+    trailing.push(edge(lane - halfWidth));
   }
-  return commands + 'L' + coordinate(points, end);
+  return 'M' + leading.concat(trailing.reverse()).join('L') + 'Z';
 }
 
 export function attachInk(card, id) {
@@ -52,9 +61,11 @@ export function attachInk(card, id) {
   const random = seededRandom(id);
   const phase = random();
   const duration = 2150 + random() * 500;
-  const spans = [.7 + random() * .11, .37 + random() * .09];
-  const offsets = [0, .44 + random() * .07];
-  paths.forEach(path => path.style.strokeWidth = (1.45 + random() * .8).toFixed(2));
+  // Each end overlaps the other stroke while the radial lanes keep the two marks apart.
+  const strokes = [
+    { span: .74 + random() * .07, offset: 0, lane: 0, weight: .36 + random() * .15, grain: random() * turn },
+    { span: .43 + random() * .055, offset: .63 + random() * .025, lane: 1.7, weight: .28 + random() * .17, grain: random() * turn },
+  ];
   let sampled;
   let frame = 0;
   let start;
@@ -64,10 +75,13 @@ export function attachInk(card, id) {
   function paint(time) {
     frame = 0;
     if (!card.isConnected || (!hovered && !focused)) return;
-    sampled ??= paths.map(path => sampleStroke(path, random));
+    sampled ??= sampleStroke(paths[0], random);
     start ??= time;
     const progress = reducedMotion.matches ? 0 : (time - start) / duration;
-    paths.forEach((path, i) => path.setAttribute('d', trace(sampled[i], phase + progress + offsets[i], spans[i])));
+    strokes.forEach(({ span, offset, lane, weight, grain }, i) => {
+      paths[i].setAttribute('d', brushOutline(sampled, phase + progress + offset, span, lane, weight, grain));
+    });
+    card.classList.add('ink-ready');
     if (!reducedMotion.matches) frame = requestAnimationFrame(paint);
   }
 
