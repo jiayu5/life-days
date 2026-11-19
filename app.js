@@ -42,7 +42,7 @@ function edit(event = null) {
 const detail = byId('detail');
 const rail = byId('rail');
 const track = byId('events');
-mountDeck(byId('deck-curve'), rail, track);
+const deck = mountDeck(rail, track);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let activeId = null;
 let reveal = null;
@@ -127,8 +127,8 @@ function updateRailControls() {
 
 rail.addEventListener('scroll', updateRailControls, { passive: true });
 new ResizeObserver(updateRailControls).observe(rail);
-byId('back').addEventListener('click', () => rail.scrollBy({ left: -rail.clientWidth * .72 }));
-byId('forward').addEventListener('click', () => rail.scrollBy({ left: rail.clientWidth * .72 }));
+byId('back').addEventListener('click', () => deck.step(-1));
+byId('forward').addEventListener('click', () => deck.step(1));
 
 function palette(event) {
   return [...event.id].reduce((sum, character) => sum + character.charCodeAt(0), 0) % 4;
@@ -154,7 +154,7 @@ function render() {
     dateLabel.dateTime = event.day;
     const artwork = element('span', '', 'cover-art');
     artwork.setAttribute('aria-hidden', 'true');
-    artwork.append(element('span', event.day.slice(8), 'record-label'));
+    artwork.append(element('span', event.day.slice(8), 'cover-day'));
     button.append(dateLabel, artwork, element('span', event.title, 'card-title'));
     row.append(button);
     return row;

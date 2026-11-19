@@ -1,7 +1,7 @@
 :root {
   color-scheme: light;
-  --paper: #f4f2e9;
-  --ink: #242822;
+  --paper: #f6f3ee;
+  --ink: #24201e;
   --muted: #625a6c;
   --rule: #26212c24;
   --violet: #6846e5;
@@ -46,9 +46,8 @@ a { color: inherit; text-decoration: none }
   --card-height: calc(var(--card-width) * 1.26);
   position: relative; isolation: isolate; display: flex;
   height: 100vh; height: 100dvh; width: 100%; overflow: hidden;
-  background: radial-gradient(ellipse at 50% 48%, #fffdf2 0%, #efeee1 59%, #e2e7d8 100%);
+  background: radial-gradient(ellipse at 52% 38%, #fffdf8, #ede7df 85%);
 }
-#deck-curve { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
 .rail { flex: 1; min-width: 0; display: flex; overflow: auto hidden; scrollbar-width: none; overscroll-behavior-x: contain }
 .rail:focus-visible { outline-offset: -5px }
 .track {
@@ -57,18 +56,20 @@ a { color: inherit; text-decoration: none }
   padding: 0 max(0px, calc((100vw - var(--card-width)) / 2));
 }
 .stop {
-  --rise: 0px; --lean: 0deg; --cover: #f5ca57; --disc: #252b24; --label: #f8edc1;
-  flex: 0 0 var(--card-width); position: relative;
-  width: var(--card-width); height: var(--card-height); transform: translateY(var(--rise)) rotate(var(--lean));
+  --rise: 0px; --yaw: 0deg; --lean: 0deg; --depth: 1; --cover: #f5ca57; --print: #40270c;
+  flex: 0 0 var(--card-width); position: relative; z-index: var(--stack, 0);
+  width: var(--card-width); height: var(--card-height); transform: perspective(760px) translateY(var(--rise)) rotateY(var(--yaw)) rotateZ(var(--lean)) scale(var(--depth));
 }
-.stop[data-tone="1"] { --cover: #f0a1a3; --disc: #692c46; --label: #fff1da }
-.stop[data-tone="2"] { --cover: #c1b5f6; --disc: #3e3585; --label: #e7dfff }
-.stop[data-tone="3"] { --cover: #b8d599; --disc: #284b3a; --label: #e6efcc }
-.stop:is(:hover,:focus-within) { z-index: 1 }
+.stop[data-tone="1"] { --cover: #f0a1a3; --print: #642442 }
+.stop[data-tone="2"] { --cover: #c1b5f6; --print: #393174 }
+.stop[data-tone="3"] { --cover: #b8d599; --print: #26452d }
+.stop:is(:hover,:focus-within) { z-index: 110 }
+.rail.dragging, .rail.dragging .day-card { cursor: grabbing }
+.rail { user-select: none }
 .day-card {
   text-align: left; position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
   justify-content: space-between; gap: 8px; padding: clamp(11px, 1.6vw, 22px);
-  border: 1px solid #252b2436; border-radius: 12px; background: var(--cover); overflow: hidden;
+  border: 1px solid #252b2436; border-radius: 5px; background: var(--cover); overflow: hidden;
   box-shadow: 0 2px 0 #262b22, 0 12px 25px #272d2633;
   transition: transform .38s cubic-bezier(.19,1,.22,1), box-shadow .38s ease;
 }
@@ -85,19 +86,20 @@ a { color: inherit; text-decoration: none }
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
 }
 .cover-art {
-  width: 79%; aspect-ratio: 1; flex: 0 1 auto; max-height: 66%; align-self: center; display: grid; place-items: center;
-  border-radius: 50%; background: repeating-radial-gradient(circle, transparent 0 3px, #fff3 4px, transparent 5px 6px), var(--disc);
-  box-shadow: 0 4px 10px #221f274a; rotate: -13deg; transition: rotate .55s cubic-bezier(.19,1,.22,1);
+  display: grid; place-items: center; flex: 1; min-height: 0; overflow: hidden; color: var(--print);
+  border-block: 1px solid color-mix(in srgb, var(--print) 37%, transparent);
 }
-.record-label {
-  display: grid; place-items: center; border-radius: 50%; width: 44%; aspect-ratio: 1;
-  color: #262720; background: var(--label); font: italic 700 clamp(20px, 4.4vw, 60px)/1 Georgia, serif;
+.cover-day {
+  font: 400 clamp(84px, 14vw, 208px)/.83 Georgia, "Times New Roman", serif;
+  letter-spacing: -.105em; padding-inline-end: .095em;
+  transition: transform .55s cubic-bezier(.19,1,.22,1);
 }
 .day-card:focus-visible { outline-offset: 6px }
 .stop:focus-within .day-card:focus-visible { transform: translateY(-20px) scale(1.08); box-shadow: 0 3px 0 #282b24, 0 24px 44px #272d2648 }
 @media (hover: hover) and (pointer: fine) {
   .stop:hover .day-card { transform: translateY(-24px) scale(1.1); box-shadow: 0 3px 0 #282b24, 0 24px 44px #272d2648 }
-  .stop:hover .cover-art { rotate: 10deg }
+  .stop:hover .cover-day { transform: scale(1.055) }
+  .rail.dragging .stop:hover .day-card { transform: none }
 }
 #rail-controls {
   position: absolute; z-index: 1; right: max(clamp(18px, 4vw, 56px), env(safe-area-inset-right));
@@ -142,11 +144,12 @@ textarea { resize: vertical }
 .primary { margin-left: auto; color: var(--paper); background: #212756; border-color: #212756 }
 @media (max-width: 650px) {
   .detail-page { width: calc(100% - 40px) }
-  .timeline-stage { --card-width: min(55vw, 46dvh) }
+  .timeline-stage { --card-width: min(63vw, 46dvh) }
+  .cover-day { font-size: clamp(75px, 31vw, 145px) }
   #detail-title { font-size: clamp(43px, 11vw, 72px) }
 }
 @media (max-height: 450px) {
-  .cover-art { width: 55%; max-height: 55% }
+  .cover-day { font-size: clamp(43px, 20dvh, 94px) }
   .day-card { padding: 9px; gap: 4px }
   .card-title { font-size: clamp(14px, 6dvh, 23px) }
   .record-label { font-size: clamp(15px, 7dvh, 30px) }
