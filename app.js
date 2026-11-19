@@ -74,14 +74,23 @@ function showDetail(event) {
   }
 }
 
+function closeDetail() {
+  const target = markerButtons.get(activeId) || document.querySelector('.add');
+  detail.close();
+  reveal?.cancel();
+  reveal = null;
+  activeId = null;
+  target.focus({ preventScroll: true });
+}
+
 function returnToRail() {
   if (reveal?.playbackRate < 0) return;
   if (reveal && !reducedMotion.matches) {
     reveal.effect.updateTiming({ fill: 'both' });
-    reveal.onfinish = () => detail.close();
+    reveal.onfinish = closeDetail;
     reveal.reverse();
   } else {
-    detail.close();
+    closeDetail();
   }
 }
 
@@ -89,12 +98,6 @@ byId('return').addEventListener('click', returnToRail);
 detail.addEventListener('cancel', event => {
   event.preventDefault();
   returnToRail();
-});
-detail.addEventListener('close', () => {
-  reveal?.cancel();
-  reveal = null;
-  (markerButtons.get(activeId) || document.querySelector('.add')).focus();
-  activeId = null;
 });
 byId('edit-event').addEventListener('click', () => {
   const event = events.find(item => item.id === activeId);
@@ -144,7 +147,7 @@ function render() {
   if (detail.open) {
     const active = events.find(event => event.id === activeId);
     if (active) fillDetail(active);
-    else detail.close();
+    else closeDetail();
   }
   updateRailControls();
   lastDate = date;
