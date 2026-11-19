@@ -1,4 +1,4 @@
-export function mountDeck(rail, track) {
+export function mountDeck(rail, track, showGalleryYear) {
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let frame = 0;
   let cards = [];
@@ -55,6 +55,10 @@ export function mountDeck(rail, track) {
     if (!width) return;
     const middle = rail.scrollLeft + width / 2;
     const spacing = cards.length > 1 ? cards[1].center - cards[0].center : width;
+    const current = cards[nearest()];
+    const progress = current ? (middle - current.center) / spacing : 0;
+    showGalleryYear(current?.node.dataset.year ?? '', reducedMotion.matches ? 0 : progress);
+
 
     for (const { node, center } of cards) {
       const distance = (center - middle) / spacing;

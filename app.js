@@ -43,13 +43,41 @@ function edit(event = null) {
 const detail = byId('detail');
 const rail = byId('rail');
 const track = byId('events');
-const deck = mountDeck(rail, track);
+const incomingYear = byId('year-in');
+const outgoingYear = byId('year-out');
+const galleryYear = incomingYear.parentElement;
+const deck = mountDeck(rail, track, showGalleryYear);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let activeId = null;
 let reveal = null;
 let returning = false;
 let detailAnimations = [];
 let markerButtons = new Map();
+
+function showGalleryYear(year, progress) {
+  galleryYear.style.setProperty('--year-shift', (-progress * 26).toFixed(1) + 'px');
+  const oldYear = incomingYear.textContent;
+  if (oldYear === year) return;
+
+  incomingYear.getAnimations().forEach(animation => animation.cancel());
+  outgoingYear.getAnimations().forEach(animation => animation.cancel());
+  outgoingYear.textContent = '';
+  incomingYear.textContent = year;
+
+  if (!oldYear || !year || reducedMotion.matches) return;
+  const direction = Number(year) > Number(oldYear) ? 1 : -1;
+  const timing = { duration: 420, easing: 'cubic-bezier(.2,.7,.25,1)' };
+  outgoingYear.textContent = oldYear;
+  const outgoing = outgoingYear.animate([
+    { opacity: 1, transform: 'translateX(0)' },
+    { opacity: 0, transform: 'translateX(' + (-direction * 38) + 'px)' },
+  ], timing);
+  outgoing.onfinish = () => { outgoingYear.textContent = ''; };
+  incomingYear.animate([
+    { opacity: 0, transform: 'translateX(' + (direction * 38) + 'px)' },
+    { opacity: 1, transform: 'translateX(0)' },
+  ], timing);
+}
 
 function fillDetail(event) {
   const elapsed = duration(event.day, today());
@@ -145,6 +173,7 @@ function render() {
   track.replaceChildren(...stops.map(event => {
     const row = element('li', '', 'stop');
     row.dataset.tone = palette(event);
+    row.dataset.year = event.day.slice(0, 4);
     const button = element('button', '', 'day-card');
     button.type = 'button';
     button.setAttribute('aria-haspopup', 'dialog');
