@@ -133,10 +133,10 @@ a { color: inherit; text-decoration: none }
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
 }
 .cover-art {
-  display: grid; place-items: center; flex: 1; min-height: 0; overflow: hidden; color: var(--print);
+  display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; flex: 1; min-height: 0; overflow: hidden; color: var(--print);
 }
 .cover-day {
-  font: 600 calc(var(--card-width) * .89)/.89 "Bodoni Moda", Didot, "Bodoni 72", "Times New Roman", serif;
+  font: 600 calc(var(--card-width) * .76)/.89 "Bodoni Moda", Didot, "Bodoni 72", "Times New Roman", serif;
   font-variant-numeric: lining-nums tabular-nums;
   text-shadow: 0 1px #442f2033;
   letter-spacing: -.095em; padding-inline-end: .08em;
