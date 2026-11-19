@@ -102,10 +102,15 @@ a { color: inherit; text-decoration: none }
 }
 .selection-ink path {
   fill: none; stroke: #231e1b; stroke-width: 1.85; stroke-linecap: round; stroke-linejoin: round;
-  vector-effect: non-scaling-stroke; stroke-dasharray: .68 .055 .145 .12;
+  vector-effect: non-scaling-stroke;
   animation: orbit-ink 2.7s linear infinite paused;
 }
-@keyframes orbit-ink { to { stroke-dashoffset: -1 } }
+@keyframes orbit-ink {
+  0%, 100% { transform: translate(0, -0.55px); stroke-width: 1.9 }
+  25% { transform: translate(.55px, 0); stroke-width: 2.25 }
+  50% { transform: translate(0, .55px); stroke-width: 1.9 }
+  75% { transform: translate(-.55px, 0); stroke-width: 2.15 }
+}
 .day-card:focus-visible { outline-offset: 6px }
 .day-card:focus-visible .selection-ink { opacity: 1 }
 .day-card:focus-visible .selection-ink path { animation-play-state: running }
@@ -173,7 +178,6 @@ textarea { resize: vertical }
   .record-label { font-size: clamp(15px, 7dvh, 30px) }
 }
 @media (prefers-reduced-motion: reduce) {
-  .selection-ink path { stroke-dasharray: none }
   .stop:hover .day-card, .stop:focus-within .day-card:focus-visible { transform: none }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important }
 }
