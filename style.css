@@ -136,7 +136,7 @@ a { color: inherit; text-decoration: none }
   display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; flex: 1; min-height: 0; overflow: hidden; color: var(--print);
 }
 .cover-day {
-  font: 600 calc(var(--card-width) * .76)/.89 "Bodoni Moda", Didot, "Bodoni 72", "Times New Roman", serif;
+  font: 600 calc(var(--card-width) * .71)/.89 "Bodoni Moda", Didot, "Bodoni 72", "Times New Roman", serif;
   font-variant-numeric: lining-nums tabular-nums;
   text-shadow: 0 1px #442f2033;
   letter-spacing: -.095em; padding-inline-end: .08em;
@@ -158,7 +158,6 @@ a { color: inherit; text-decoration: none }
   .stop:hover .day-card { transform: perspective(660px) translateY(-24px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg)) scale(1.1); transition-duration: .23s; box-shadow: 0 3px 0 #a5967d, 17px 30px 44px rgb(54 38 23 / calc(.18 + var(--light) * .12)) }
   .stop:hover .ink-ready .selection-ink { opacity: 1 }
   .rail.dragging .selection-ink { opacity: 0 }
-  .stop:hover .cover-day { transform: scale(1.055) }
   .rail.dragging .stop:hover .day-card { transform: none }
 }
 #rail-controls {
