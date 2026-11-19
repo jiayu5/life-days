@@ -1,92 +1,107 @@
 :root {
-  color-scheme: dark;
-  --navy: #202c73;
-  --paper: #f3efe4;
-  --muted: #c5cbe8;
-  --gold: #ffe178;
-  --rule: #a8b2e45c;
+  color-scheme: light;
+  --paper: #f8f7f2;
+  --ink: #222027;
+  --muted: #625a6c;
+  --rule: #26212c24;
+  --violet: #6846e5;
   font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  color: var(--paper);
-  background: var(--navy);
+  color: var(--ink);
+  background: var(--paper);
 }
 * { box-sizing: border-box }
-body { margin: 0; min-height: 100svh; background: radial-gradient(ellipse at 67% 36%, #384ba1, transparent 72%); }
+body { margin: 0; min-height: 100svh }
 body:has(#detail[open]) { overflow: hidden }
 button, input, textarea { font: inherit }
-button { cursor: pointer; color: inherit }
+button { cursor: pointer; color: inherit; -webkit-tap-highlight-color: transparent }
 button:disabled { opacity: .45; cursor: default }
 [hidden] { display: none !important }
 a { color: inherit; text-decoration: none }
-:focus-visible { outline: 2px solid var(--gold); outline-offset: 5px }
-.frame { width: min(1320px, calc(100% - 112px)); margin-inline: auto }
-.mast { display: flex; justify-content: space-between; align-items: center; min-height: 78px; border-bottom: 1px solid var(--rule) }
-.wordmark { font-size: 20px; font-weight: 800 }
-.wordmark span { color: var(--gold); margin-right: .25em }
+:focus-visible { outline: 2px solid var(--violet); outline-offset: 5px }
+.frame { width: min(1340px, calc(100% - 104px)); margin-inline: auto }
+.mast { display: flex; justify-content: space-between; align-items: center; min-height: 77px; border-bottom: 1px solid var(--rule) }
+.wordmark { display: inline-flex; align-items: center; gap: 9px; font-size: 19px; font-weight: 820 }
+.wordmark span { display: grid; place-items: center; width: 33px; height: 33px; border-radius: 50%; background: #e9e0ff; color: #5339c3; font-size: 23px; transition: rotate .55s cubic-bezier(.16,1,.3,1) }
+.wordmark:hover span { rotate: 90deg }
 .add, #return, #edit-event, .retry {
   border: 1px solid currentColor;
   background: transparent;
   padding: 10px 15px;
   font-size: 15px;
+  border-radius: 999px;
 }
-.add:hover:not(:disabled) { background: var(--gold); color: var(--navy); border-color: var(--gold) }
-.timeline { min-height: calc(100svh - 78px); display: flex; flex-direction: column; justify-content: center; padding: clamp(58px, 10vh, 118px) 0; position: relative }
-h1 { font-size: clamp(45px, 7.6vw, 112px); letter-spacing: -.075em; line-height: 1.03; margin: 0 0 clamp(32px, 7vh, 76px); font-weight: 900 }
-#status { color: var(--muted); margin: 0 0 18px }
-.rail { overflow-x: auto; scrollbar-width: thin; scrollbar-color: #a8b2e4 #293878; scroll-behavior: smooth }
-.track { display: flex; min-width: 100%; width: max-content; list-style: none; position: relative; margin: 0; padding: 0; min-height: 244px; isolation: isolate }
-.track::before, .track::after {
-  content: ""; position: absolute; pointer-events: none;
-  left: 0; right: 0; z-index: -1;
+.add { background: var(--ink); color: white; border: 0; padding: 12px 18px; transition: background-color .2s, translate .2s }
+.add:hover:not(:disabled) { background: var(--violet); translate: 0 -2px }
+.timeline { padding: clamp(34px, 7vh, 88px) 0 26px }
+.timeline-heading { display: flex; justify-content: space-between; align-items: end; gap: 26px; margin-bottom: 30px }
+h1 { font-size: clamp(43px, 7.5vw, 112px); letter-spacing: -.09em; line-height: .99; margin: 0; font-weight: 900 }
+h1 span { color: var(--violet); margin-left: .07em; font-family: Georgia, serif }
+.timeline-heading p { color: var(--muted); font-size: clamp(15px, 1.55vw, 20px); line-height: 1.55; margin: 0 0 2px; flex: 0 0 auto }
+#status { color: var(--muted); margin: 0 0 15px }
+.timeline-stage {
+  position: relative; isolation: isolate; display: flex; align-items: stretch;
+  min-height: clamp(340px, 52vh, 540px); border-radius: 32px; overflow: hidden;
+  background-color: #f1ebff;
+  background-image: radial-gradient(circle, #7468944d .75px, transparent 1px), radial-gradient(ellipse at 8% 12%, #fff7df, transparent 57%), radial-gradient(ellipse at 96% 90%, #fbcfe3, transparent 53%);
+  background-size: 18px 18px, auto, auto;
 }
+#ribbon { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none }
+.rail { flex: 1; min-width: 0; display: flex; overflow-x: auto; scrollbar-width: thin; scrollbar-color: #8a70da transparent; scroll-behavior: smooth }
+.track { flex: none; display: flex; min-width: 100%; width: max-content; list-style: none; position: relative; margin: 0; padding: 0; isolation: isolate }
 .track::before {
-  top: 50%; height: 1px;
-  background: linear-gradient(90deg, transparent, #e0e6ff 80%, transparent) no-repeat, linear-gradient(90deg, var(--rule), #bdc6ef, var(--rule));
-  background-size: 170px 100%, 100% 100%;
-  animation: stream 9s linear infinite;
-
+  content: ""; position: absolute; pointer-events: none;
+  inset: 50% 0 auto; height: 1px; background: #33255b65; z-index: -1;
 }
-.track::after {
-  top: calc(50% - 6px); height: 13px;
-  background: repeating-linear-gradient(90deg, #d1d9f665 0 1px, transparent 1px 15px);
-  mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
-  animation: drift 6s linear infinite;
-}
-@keyframes stream { from { background-position: -180px 0, 0 0 } to { background-position: calc(100% + 180px) 0, 0 0 } }
-@keyframes drift { to { background-position: 15px 0 } }
-.stop { flex: 1 0 clamp(155px, 19vw, 285px); min-width: 0; position: relative; display: grid; place-items: center }
+.stop { --marker: #ffb293; flex: 1 0 clamp(160px, 18vw, 270px); min-width: 0; position: relative; display: grid; place-items: center }
+.stop[data-tone="1"] { --marker: #ffd76e }
+.stop[data-tone="2"] { --marker: #cdb6ff }
+.stop[data-tone="3"] { --marker: #bcebd0 }
 .stop button, .now { position: relative; height: 100%; width: 100%; padding: 0; border: 0; background: none; display: grid; place-items: center; text-align: center }
-.stop button:focus-visible { outline-offset: -6px }
+.stop button:focus-visible { outline: none }
+.stop button:focus-visible .pin { outline: 2px solid var(--violet); outline-offset: 4px }
 .pin {
-  width: 13px; height: 13px; border-radius: 50%; background: var(--gold);
-  box-shadow: 0 0 0 7px #ffe17826, 0 0 24px #ffe1785e;
-  transition: transform .24s ease, box-shadow .24s ease;
+  position: relative; display: grid; place-items: center;
+  width: 35px; height: 35px; border-radius: 50%; background: #fffaf3;
+  border: 1px solid #30223f; box-shadow: 0 4px 0 #30223f;
+  transition: transform .42s cubic-bezier(.18,1.55,.36,1), background-color .2s, box-shadow .2s;
 }
-.stop button:hover .pin, .stop button:focus-visible .pin {
-  transform: scale(1.35); box-shadow: 0 0 0 7px #ffe17838, 0 0 30px #ffe17896;
+.pin::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--ink); transition: transform .3s }
+.stop button:is(:hover,:focus-visible) .pin { transform: translateY(-7px) scale(1.34) rotate(-12deg); background: var(--marker); box-shadow: 0 6px 0 #30223f }
+.stop button:is(:hover,:focus-visible) .pin::before { transform: scale(1.45) }
+.stop button:active .pin { transform: translateY(3px) scale(.92); box-shadow: 0 1px 0 #30223f }
+.marker-label {
+  position: absolute; top: calc(50% + clamp(58px, 10vh, 108px)); inset-inline: 12px;
+  justify-self: center; max-width: calc(100% - 20px); display: grid; gap: 3px;
+  padding: 8px 15px; border-radius: 14px; border: 1px solid #30223f2b;
+  background: #fffcf4; box-shadow: 0 3px 0 #30223f24;
+  transition: transform .4s cubic-bezier(.18,1.45,.36,1), background-color .2s;
 }
-.pin::after { content: ""; position: absolute; width: 1px; height: 25px; left: 50%; top: calc(50% + 13px); background: var(--rule) }
-.stop button:hover .pin::after, .stop button:focus-visible .pin::after { content: none }
-.marker-label { position: absolute; top: calc(50% + 40px); inset-inline: 10px; display: grid; gap: 6px; }
-.stop:nth-child(even) .marker-label { top: auto; bottom: calc(50% + 40px) }
-.stop:nth-child(even) .pin::after { top: auto; bottom: calc(50% + 13px) }
+.stop button:is(:hover,:focus-visible) .marker-label { transform: translateY(-5px) rotate(-3deg); background: var(--marker) }
+.stop:nth-child(even) .marker-label { top: auto; bottom: calc(50% + clamp(58px, 10vh, 108px)) }
 .marker-label time, #detail-date, #detail-count { font-family: "SFMono-Regular", Consolas, monospace; font-variant-numeric: tabular-nums }
-.marker-label time { color: var(--muted); font-size: 14px }
-.marker-name { font-size: 19px; font-weight: 750; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
-.now .pin { background: var(--navy); box-shadow: 0 0 0 5px #c9d5ff24; border: 2px solid #c9d5ff }
-.now .marker-name { color: var(--muted); font-weight: 500 }
-.rail-footer { border-top: 1px solid var(--rule); display: flex; justify-content: space-between; align-items: center; min-height: 57px; color: var(--muted); font-size: 14px }
+.marker-label time { color: #514660; font-size: 13px }
+.marker-name { font-size: 18px; font-weight: 760; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.now .pin { width: 24px; height: 24px; background: #f8f3ff; box-shadow: none; border: 1px dashed #3b3057 }
+.now .pin::before { width: 5px; height: 5px; background: #6846e5 }
+.now .marker-label { background: #f8f3ff; box-shadow: none }
+.now .marker-name { color: #514660; font-weight: 650 }
+.rail-footer { display: flex; justify-content: space-between; align-items: center; min-height: 53px; padding-inline: 4px; color: var(--muted); font-size: 14px }
 #rail-controls { display: flex; gap: 8px }
-#rail-controls button { border: 1px solid var(--rule); background: none; width: 44px; height: 38px; font-size: 24px; line-height: 1 }
-#rail-controls button:hover:not(:disabled) { border-color: var(--gold); color: var(--gold) }
+#rail-controls button { border: 1px solid var(--rule); border-radius: 999px; background: none; width: 42px; height: 36px; font-size: 24px; line-height: 1 }
+#rail-controls button:hover:not(:disabled) { border-color: var(--violet); color: var(--violet) }
 
 #detail {
-  --detail-ink: #252656;
+  --detail-ink: #211b28; --scene: #fed866;
   inset: 0; margin: 0; padding: 0; width: 100%; max-width: none; height: 100%; max-height: none;
-  border: 0; background: var(--gold); color: var(--detail-ink); overscroll-behavior: contain;
+  border: 0; background: var(--scene); color: var(--detail-ink); overscroll-behavior: contain;
 }
+#detail[data-palette="1"] { --scene: #f5b9d9 }
+#detail[data-palette="2"] { --scene: #c8b6ff }
+#detail[data-palette="3"] { --scene: #bfe7d1 }
+#detail-year { position: fixed; right: -.03em; bottom: -.23em; color: #211b2813; font: 900 clamp(140px, 38vw, 530px)/1 Arial, sans-serif; letter-spacing: -.11em; pointer-events: none; user-select: none }
 #detail::backdrop { background: transparent }
 #detail :focus-visible, #editor :focus-visible { outline-color: #3746b4 }
-.detail-page { width: min(1120px, calc(100% - 100px)); margin: auto; min-height: 100%; display: flex; flex-direction: column }
+.detail-page { position: relative; width: min(1120px, calc(100% - 100px)); margin: auto; min-height: 100%; display: flex; flex-direction: column }
 .detail-bar { display: flex; justify-content: space-between; gap: 8px; padding: max(20px, env(safe-area-inset-top)) 0 20px; border-bottom: 1px solid #25265660 }
 .detail-content { margin-block: auto; padding: clamp(38px, 10vh, 100px) 0 }
 #detail-date { font-size: clamp(19px, 3vw, 32px); letter-spacing: -.06em }
@@ -110,14 +125,18 @@ textarea { resize: vertical }
 #form-error { color: #a82626; min-height: 1.3em }
 .primary { margin-left: auto; color: var(--paper); background: #212756; border-color: #212756 }
 @media (max-width: 650px) {
-  .frame, .detail-page { width: calc(100% - 40px) }
-  .mast { min-height: 64px }
-  .timeline { min-height: calc(100svh - 64px); padding-block: 45px 70px }
-  h1 { margin-bottom: 24px }
-  .track { min-height: 218px }
-  .stop { flex-basis: 140px }
-  .marker-label { inset-inline: 5px }
-  .marker-name { font-size: 17px }
+  .frame, .detail-page { position: relative; width: calc(100% - 40px) }
+  .mast { min-height: 67px }
+  .timeline { padding-block: 35px 28px }
+  .timeline-heading { display: block; margin-bottom: 23px }
+  .timeline-heading p { margin-top: 10px }
+  .timeline-heading br { display: none }
+  .timeline-stage { min-height: 330px; border-radius: 22px }
+  .stop { flex-basis: 128px }
+  .marker-label { inset-inline: 8px; padding-inline: 9px }
+  .marker-name { font-size: 16px }
+  .rail-footer { padding-inline: 0 }
+  #detail-title { font-size: clamp(43px, 11vw, 72px) }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important }

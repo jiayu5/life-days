@@ -1,4 +1,5 @@
 import { today, duration } from './dates.js';
+import { mountRibbon } from './ribbon.js';
 
 const byId = id => document.getElementById(id);
 const dialog = byId('editor');
@@ -41,13 +42,18 @@ function edit(event = null) {
 const detail = byId('detail');
 const rail = byId('rail');
 const track = byId('events');
+mountRibbon(byId('ribbon'), rail);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 let activeId = null;
 let reveal = null;
+let returning = false;
+let detailAnimations = [];
 let markerButtons = new Map();
 
 function fillDetail(event) {
   const elapsed = duration(event.day, today());
+  byId('detail-year').textContent = event.day.slice(0, 4);
+  detail.dataset.palette = event.id === 'birthday' ? '0' : String(Number(event.day.slice(5, 7)) % 4);
   byId('detail-date').dateTime = event.day;
   byId('detail-date').textContent = event.day.replaceAll('-', '.');
   byId('detail-title').textContent = event.title;
@@ -70,7 +76,11 @@ function showDetail(event) {
     reveal = detail.animate([
       { clipPath: `circle(9px at ${x}px ${y}px)` },
       { clipPath: `circle(${radius + 8}px at ${x}px ${y}px)` },
-    ], { duration: 620, easing: 'cubic-bezier(.2,.65,.2,1)' });
+    ], { duration: 680, easing: 'cubic-bezier(.19,1,.22,1)' });
+    detailAnimations = [...detail.querySelectorAll('.detail-content > *, #detail-year')].map((node, index) => node.animate([
+      { opacity: 0, translate: '0 34px' },
+      { opacity: 1, translate: '0 0' },
+    ], { duration: 540, delay: 130 + index * 65, fill: 'backwards', easing: 'cubic-bezier(.18,.86,.3,1)' }));
   }
 }
 
@@ -79,16 +89,21 @@ function closeDetail() {
   detail.close();
   reveal?.cancel();
   reveal = null;
+  detailAnimations.forEach(animation => animation.cancel());
+  detailAnimations = [];
   activeId = null;
+  returning = false;
   target.focus({ preventScroll: true });
 }
 
 function returnToRail() {
-  if (reveal?.playbackRate < 0) return;
+  if (returning) return;
   if (reveal && !reducedMotion.matches) {
+    returning = true;
     reveal.effect.updateTiming({ fill: 'both' });
     reveal.onfinish = closeDetail;
-    reveal.reverse();
+    reveal.updatePlaybackRate(-1.7);
+    reveal.play();
   } else {
     closeDetail();
   }
@@ -124,8 +139,9 @@ function render() {
   byId('status').textContent = events.length ? '' : '记下你的第一个大日子。';
   byId('status').hidden = events.length > 0;
   byId('hint').hidden = !events.length;
-  track.replaceChildren(...stops.map(event => {
+  track.replaceChildren(...stops.map((event, index) => {
     const row = element('li', '', 'stop');
+    row.dataset.tone = index % 4;
     const label = element('span', '', 'marker-label');
     const dateLabel = element('time', event.day.replaceAll('-', '.'));
     dateLabel.dateTime = event.day;

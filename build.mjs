@@ -4,6 +4,7 @@ const files = {
   '/': ['index.html', 'text/html'],
   '/style.css': ['style.css', 'text/css'],
   '/app.js': ['app.js', 'text/javascript'],
+  '/ribbon.js': ['ribbon.js', 'text/javascript'],
   '/dates.js': ['dates.js', 'text/javascript'],
 };
 const assets = Object.fromEntries(await Promise.all(Object.entries(files).map(async ([path, [file, type]]) => [
