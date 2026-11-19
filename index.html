@@ -1,30 +1,25 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f8f7f2">
-<title>人生大日子</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f1ebff">
+<title>Big Days</title>
 <meta name="description" content="记录人生中重要的日子，看看从那天起已经走了多远。">
 <link rel="stylesheet" href="/style.css">
 <script type="module" src="/app.js"></script>
 </head>
 <body>
-<header class="mast frame"><a href="/" class="wordmark"><span aria-hidden="true">✳</span> 大日子</a><button class="add" disabled>＋ 记一个日子</button></header>
-<main class="frame">
-<section class="timeline" aria-labelledby="timeline-title">
-<div class="timeline-heading">
-<h1 id="timeline-title">人生时间线<span aria-hidden="true">.</span></h1>
-<p>把生命里重要的那一天，<br>留在这里。</p>
-</div>
-<p id="status" role="status">正在读取记录…</p>
-<div class="timeline-stage">
+<header class="mast">
+<a href="/" class="wordmark" lang="en"><span aria-hidden="true">✳</span> Big Days</a>
+<button class="add" type="button" lang="en" aria-label="Add a day" disabled><span aria-hidden="true">+</span> Add</button>
+</header>
+<main class="timeline-stage" aria-label="Big Days">
 <canvas id="ribbon" aria-hidden="true"></canvas>
 <div id="rail" class="rail" aria-label="按日期排列的纪念日">
 <ol id="events" class="track"></ol>
 </div>
-</div>
-<div class="rail-footer"><p id="hint" hidden>点开一个节点，回到那一天</p><div id="rail-controls" hidden><button id="back" aria-label="浏览更早的日期">‹</button><button id="forward" aria-label="浏览更晚的日期">›</button></div></div>
-</section>
+<p id="status" role="status" hidden></p>
+<div id="rail-controls" hidden><button id="back" type="button" aria-label="浏览更早的日期">‹</button><button id="forward" type="button" aria-label="浏览更晚的日期">›</button></div>
 </main>
 <dialog id="detail" aria-labelledby="detail-title">
 <div id="detail-year" aria-hidden="true"></div>
@@ -39,7 +34,7 @@
 </article>
 </dialog>
 <dialog id="editor"><form id="event-form">
-<div class="dialog-head"><h2 id="form-title">记一个日子</h2><button type="button" class="close" aria-label="关闭">×</button></div>
+<div class="dialog-head"><h2 id="form-title">新增日期</h2><button type="button" class="close" aria-label="关闭">×</button></div>
 <label>事件名称<input name="title" required maxlength="60" placeholder="例如：我们结婚了"></label>
 <label>日期<input name="day" type="date" required min="0001-01-01" max="9999-12-31"></label>
 <label>想记下的话（可选）<textarea name="note" maxlength="500" rows="3"></textarea></label>

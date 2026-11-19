@@ -19,6 +19,7 @@ export function mountRibbon(canvas, rail) {
   let visible = true;
   let previous = 0;
   let phase = 0;
+  let streakProgress = 0;
   let pressed = 0;
   let impulse = 0;
   let gradients = [];
@@ -31,7 +32,7 @@ export function mountRibbon(canvas, rail) {
     const base = Math.sin(unit * TAU * 1.22 - phase + scroll) * .12;
     const bow = influence * (motion.y * .36 + .08);
     const ripple = impulse * Math.sin(distance * 5 - phase * 15) * influence * .12;
-    const twist = Math.sin(unit * 7.6 + phase * .9 + band * .72 + scroll + influence);
+    const twist = Math.sin(unit * 7.6 - phase * .9 + band * .72 + scroll + influence);
     return height * (.50 + base + bow + ripple + (band - 1.5) * .034 + twist * (.065 + band * .012) + edge * (.074 + .026 * twist));
   }
 
@@ -43,7 +44,8 @@ export function mountRibbon(canvas, rail) {
     if (!reduced.matches) {
       const ease = 1 - Math.pow(.88, dt);
       for (const key of Object.keys(motion)) motion[key] += (target[key] - motion[key]) * ease;
-      phase += .0048 * dt;
+      phase += .009 * dt;
+      streakProgress = (streakProgress + .0017 * dt) % 1;
       impulse += (pressed - impulse) * ease;
       pressed *= Math.pow(.91, dt);
     }
@@ -67,7 +69,34 @@ export function mountRibbon(canvas, rail) {
         context.stroke();
       }
     }
-    if (!reduced.matches) schedule();
+    if (!reduced.matches) {
+      drawStreaks();
+      schedule();
+    }
+  }
+
+  function drawStreaks() {
+    const pathLength = width + 150;
+    for (let index = 0; index < 11; index++) {
+      const progress = (streakProgress + index * .137) % 1;
+      const band = index % bands.length;
+      const edge = Math.cos(index * 7) * .58;
+      const end = progress * pathLength - 30;
+      const start = end - (24 + index % 3 * 19);
+      const light = context.createLinearGradient(start, 0, end, 0);
+      light.addColorStop(0, '#ffffff00');
+      light.addColorStop(1, '#ffffffb5');
+      context.strokeStyle = light;
+      context.lineWidth = 1.6;
+      context.lineCap = 'round';
+      context.beginPath();
+      context.moveTo(start, point(start, band, edge));
+      for (let step = 1; step <= 8; step++) {
+        const x = start + (end - start) * step / 8;
+        context.lineTo(x, point(x, band, edge));
+      }
+      context.stroke();
+    }
   }
 
   function schedule() {

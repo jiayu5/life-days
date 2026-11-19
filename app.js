@@ -33,7 +33,7 @@ function edit(event = null) {
   form.elements.title.value = event?.title || '';
   form.elements.day.value = event?.day || today();
   form.elements.note.value = event?.note || '';
-  byId('form-title').textContent = event ? '编辑日子' : '记一个日子';
+  byId('form-title').textContent = event ? '编辑日子' : '新增日期';
   byId('form-error').textContent = '';
   deleteButton.hidden = !event;
   dialog.showModal();
@@ -136,9 +136,7 @@ function render() {
   const stops = [...events, { title: '今天', day: date }].sort((a, b) => a.day.localeCompare(b.day));
   const oldFocus = [...markerButtons].find(([, button]) => button === document.activeElement)?.[0];
   markerButtons = new Map();
-  byId('status').textContent = events.length ? '' : '记下你的第一个大日子。';
-  byId('status').hidden = events.length > 0;
-  byId('hint').hidden = !events.length;
+  byId('status').hidden = true;
   track.replaceChildren(...stops.map((event, index) => {
     const row = element('li', '', 'stop');
     row.dataset.tone = index % 4;
