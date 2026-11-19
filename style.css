@@ -207,7 +207,7 @@ textarea { resize: vertical }
   #detail-title { font-size: clamp(43px, 11vw, 72px) }
 }
 @media (max-height: 450px) {
-  .cover-day { font-size: calc(var(--card-width) * .72) }
+  .cover-day { font-size: calc(var(--card-width) * .63) }
   .day-card { padding: 10% 9%; gap: 4px }
   .card-title { font-size: clamp(14px, 6dvh, 23px) }
   .record-label { font-size: clamp(15px, 7dvh, 30px) }
