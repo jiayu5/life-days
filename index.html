@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#233cb8">
+<title>人生大日子</title>
+<meta name="description" content="记录人生中重要的日子，看看从那天起已经走了多远。">
+<link rel="stylesheet" href="/style.css">
+<script type="module" src="/app.js"></script>
+</head>
+<body>
+<header class="mast"><div class="frame mast-inner"><a href="/" class="wordmark">大日子<span>.</span></a><a href="#timeline">人生时间线</a><button class="add" disabled>＋ 记一个日子</button></div></header>
+<main>
+<section class="hero"><div class="frame hero-inner">
+<div class="intro"><p class="edition"><span></span> 时间纪念册</p><h1>人生<br>大日子<span>.</span></h1><p class="subtitle">有些日子，过了很久也记得。</p></div>
+<div class="stage" aria-label="日历"><div class="calendar"><div class="binding"><i></i><i></i></div><div class="paper"><div class="cal-top"><span id="cal-year">1996</span><span id="cal-month">03 月</span></div><strong id="cal-day">26</strong><div class="cal-bottom"><span id="cal-title">我出生了</span><span aria-hidden="true">✳</span></div></div></div></div>
+<div class="hero-foot"><span>自那天起</span><strong id="hero-count">…</strong><span id="hero-unit">天</span></div>
+</div></section>
+<section id="timeline" class="frame timeline">
+<div class="section-head"><div><p class="edition"><span></span> 重要时刻</p><h2>人生时间线</h2></div><button class="add" disabled>＋ 新增事件</button></div>
+<p id="status" role="status">正在读取记录…</p>
+<ol id="events"></ol>
+</section>
+</main>
+<footer class="frame"><span>大日子.</span><span>日期以北京时间计算</span></footer>
+<dialog id="editor"><form id="event-form">
+<div class="dialog-head"><h2 id="form-title">记一个日子</h2><button type="button" class="close" aria-label="关闭">×</button></div>
+<label>事件名称<input name="title" required maxlength="60" placeholder="例如：我们结婚了"></label>
+<label>日期<input name="day" type="date" required min="0001-01-01" max="9999-12-31"></label>
+<label>想记下的话（可选）<textarea name="note" maxlength="500" rows="3"></textarea></label>
+<p id="form-error" role="alert"></p>
+<div class="dialog-actions"><button type="button" id="delete" hidden>删除事件</button><button class="primary" type="submit">保存日子</button></div>
+</form></dialog>
+</body>
+</html>

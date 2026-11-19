@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS events (
+  owner TEXT NOT NULL,
+  id TEXT NOT NULL,
+  title TEXT NOT NULL,
+  day TEXT NOT NULL,
+  note TEXT NOT NULL DEFAULT '',
+  PRIMARY KEY (owner, id)
+);
