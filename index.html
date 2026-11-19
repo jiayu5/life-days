@@ -2,27 +2,35 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#233cb8">
+<meta name="theme-color" content="#202c73">
 <title>人生大日子</title>
 <meta name="description" content="记录人生中重要的日子，看看从那天起已经走了多远。">
 <link rel="stylesheet" href="/style.css">
 <script type="module" src="/app.js"></script>
 </head>
 <body>
-<header class="mast"><div class="frame mast-inner"><a href="/" class="wordmark">大日子<span>.</span></a><a href="#timeline">人生时间线</a><button class="add" disabled>＋ 记一个日子</button></div></header>
-<main>
-<section class="hero"><div class="frame hero-inner">
-<div class="intro"><p class="edition"><span></span> 时间纪念册</p><h1>人生<br>大日子<span>.</span></h1><p class="subtitle">有些日子，过了很久也记得。</p></div>
-<div class="stage" aria-label="日历"><div class="calendar"><div class="binding"><i></i><i></i></div><div class="paper"><div class="cal-top"><span id="cal-year">1996</span><span id="cal-month">03 月</span></div><strong id="cal-day">26</strong><div class="cal-bottom"><span id="cal-title">我出生了</span><span aria-hidden="true">✳</span></div></div></div></div>
-<div class="hero-foot"><span>自那天起</span><strong id="hero-count">…</strong><span id="hero-unit">天</span></div>
-</div></section>
-<section id="timeline" class="frame timeline">
-<div class="section-head"><div><p class="edition"><span></span> 重要时刻</p><h2>人生时间线</h2></div><button class="add" disabled>＋ 新增事件</button></div>
+<header class="mast frame"><a href="/" class="wordmark"><span aria-hidden="true">✳</span> 大日子</a><button class="add" disabled>＋ 记一个日子</button></header>
+<main class="frame">
+<section class="timeline" aria-labelledby="timeline-title">
+<h1 id="timeline-title">人生时间线</h1>
 <p id="status" role="status">正在读取记录…</p>
-<ol id="events"></ol>
+<div id="rail" class="rail" aria-label="按日期排列的纪念日">
+<ol id="events" class="track"></ol>
+</div>
+<div class="rail-footer"><p id="hint" hidden>点开一个节点，回到那一天</p><div id="rail-controls" hidden><button id="back" aria-label="浏览更早的日期">‹</button><button id="forward" aria-label="浏览更晚的日期">›</button></div></div>
 </section>
 </main>
-<footer class="frame"><span>大日子.</span><span>日期以北京时间计算</span></footer>
+<dialog id="detail" aria-labelledby="detail-title">
+<article class="detail-page">
+<header class="detail-bar"><button type="button" id="return" autofocus>× <span>返回时间线</span></button><button type="button" id="edit-event">编辑日子</button></header>
+<div class="detail-content">
+<time id="detail-date"></time>
+<h2 id="detail-title"></h2>
+<p id="detail-note" hidden></p>
+<div class="elapsed"><p id="detail-duration"></p><p><strong id="detail-count"></strong> 天</p></div>
+</div>
+</article>
+</dialog>
 <dialog id="editor"><form id="event-form">
 <div class="dialog-head"><h2 id="form-title">记一个日子</h2><button type="button" class="close" aria-label="关闭">×</button></div>
 <label>事件名称<input name="title" required maxlength="60" placeholder="例如：我们结婚了"></label>

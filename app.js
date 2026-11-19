@@ -38,35 +38,115 @@ function edit(event = null) {
   dialog.showModal();
 }
 
+const detail = byId('detail');
+const rail = byId('rail');
+const track = byId('events');
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+let activeId = null;
+let reveal = null;
+let markerButtons = new Map();
+
+function fillDetail(event) {
+  const elapsed = duration(event.day, today());
+  byId('detail-date').dateTime = event.day;
+  byId('detail-date').textContent = event.day.replaceAll('-', '.');
+  byId('detail-title').textContent = event.title;
+  byId('detail-note').textContent = event.note;
+  byId('detail-note').hidden = !event.note;
+  byId('detail-duration').textContent = elapsed.label;
+  byId('detail-count').textContent = number.format(Math.abs(elapsed.difference));
+}
+
+function showDetail(event) {
+  const pin = markerButtons.get(event.id).querySelector('.pin').getBoundingClientRect();
+  const x = pin.left + pin.width / 2;
+  const y = pin.top + pin.height / 2;
+  const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  activeId = event.id;
+  fillDetail(event);
+  detail.scrollTop = 0;
+  detail.showModal();
+  if (!reducedMotion.matches && typeof detail.animate === 'function') {
+    reveal = detail.animate([
+      { clipPath: `circle(9px at ${x}px ${y}px)` },
+      { clipPath: `circle(${radius + 8}px at ${x}px ${y}px)` },
+    ], { duration: 620, easing: 'cubic-bezier(.2,.65,.2,1)' });
+  }
+}
+
+function returnToRail() {
+  if (reveal?.playbackRate < 0) return;
+  if (reveal && !reducedMotion.matches) {
+    reveal.effect.updateTiming({ fill: 'both' });
+    reveal.onfinish = () => detail.close();
+    reveal.reverse();
+  } else {
+    detail.close();
+  }
+}
+
+byId('return').addEventListener('click', returnToRail);
+detail.addEventListener('cancel', event => {
+  event.preventDefault();
+  returnToRail();
+});
+detail.addEventListener('close', () => {
+  reveal?.cancel();
+  reveal = null;
+  (markerButtons.get(activeId) || document.querySelector('.add')).focus();
+  activeId = null;
+});
+byId('edit-event').addEventListener('click', () => {
+  const event = events.find(item => item.id === activeId);
+  if (event) edit(event);
+});
+
+function updateRailControls() {
+  const max = rail.scrollWidth - rail.clientWidth;
+  byId('rail-controls').hidden = max <= 2;
+  byId('back').disabled = rail.scrollLeft <= 2;
+  byId('forward').disabled = rail.scrollLeft >= max - 2;
+}
+
+rail.addEventListener('scroll', updateRailControls, { passive: true });
+new ResizeObserver(updateRailControls).observe(rail);
+byId('back').addEventListener('click', () => rail.scrollBy({ left: -rail.clientWidth * .72 }));
+byId('forward').addEventListener('click', () => rail.scrollBy({ left: rail.clientWidth * .72 }));
+
 function render() {
   const date = today();
-  const sorted = [...events].sort((a, b) => a.day.localeCompare(b.day));
-  const featured = events.find(event => event.id === 'birthday') || sorted[0];
-  byId('status').textContent = sorted.length ? '' : '还没有事件。记下第一个重要的日子吧。';
-  byId('status').hidden = sorted.length > 0;
-  byId('cal-year').textContent = (featured?.day || date).slice(0, 4);
-  byId('cal-month').textContent = (featured?.day || date).slice(5, 7) + ' 月';
-  byId('cal-day').textContent = (featured?.day || date).slice(8);
-  byId('cal-title').textContent = featured?.title || '今天';
-  const difference = featured ? duration(featured.day, date).difference : 0;
-  document.querySelector('.hero-foot > span').textContent = featured ? (difference < 0 ? '距离那一天还有' : '自那天起') : '从今天开始';
-  byId('hero-count').textContent = featured ? number.format(Math.abs(difference)) : '';
-  byId('hero-unit').textContent = featured ? '天' : '';
-  byId('events').replaceChildren(...sorted.map(event => {
-    const row = element('li', '', 'event');
-    const dateLabel = element('time', event.day.replaceAll('-', ' / '));
+  const stops = [...events, { title: '今天', day: date }].sort((a, b) => a.day.localeCompare(b.day));
+  const oldFocus = [...markerButtons].find(([, button]) => button === document.activeElement)?.[0];
+  markerButtons = new Map();
+  byId('status').textContent = events.length ? '' : '记下你的第一个大日子。';
+  byId('status').hidden = events.length > 0;
+  byId('hint').hidden = !events.length;
+  track.replaceChildren(...stops.map(event => {
+    const row = element('li', '', 'stop');
+    const label = element('span', '', 'marker-label');
+    const dateLabel = element('time', event.day.replaceAll('-', '.'));
     dateLabel.dateTime = event.day;
-    const story = element('div', '');
-    story.append(element('h3', event.title));
-    if (event.note) story.append(element('p', event.note));
-    const elapsed = element('span', duration(event.day, date).label, 'elapsed');
-    const button = element('button', '编辑', 'edit');
-    button.type = 'button';
-    button.setAttribute('aria-label', '编辑' + event.title);
-    button.addEventListener('click', () => edit(event));
-    row.append(dateLabel, story, elapsed, button);
+    label.append(dateLabel, element('span', event.title, 'marker-name'));
+    const pin = element('span', '', 'pin');
+    pin.setAttribute('aria-hidden', 'true');
+    const marker = event.id ? element('button', '') : element('div', '', 'now');
+    if (event.id) {
+      marker.type = 'button';
+      marker.setAttribute('aria-haspopup', 'dialog');
+      marker.addEventListener('click', () => showDetail(event));
+      markerButtons.set(event.id, marker);
+    }
+    marker.append(pin, label);
+    row.append(marker);
     return row;
   }));
+  if (oldFocus) markerButtons.get(oldFocus)?.focus({ preventScroll: true });
+  if (detail.open) {
+    const active = events.find(event => event.id === activeId);
+    if (active) fillDetail(active);
+    else detail.close();
+  }
+  updateRailControls();
   lastDate = date;
 }
 
@@ -77,7 +157,7 @@ async function load() {
     document.querySelectorAll('.add').forEach(button => { button.disabled = false; });
     return true;
   } catch (error) {
-    const retry = element('button', '重试', 'edit');
+    const retry = element('button', '重试', 'retry');
     retry.addEventListener('click', load);
     byId('status').replaceChildren(error.message + ' ', retry);
     byId('status').hidden = false;
