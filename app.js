@@ -155,7 +155,7 @@ function render() {
     const artwork = element('span', '', 'cover-art');
     artwork.setAttribute('aria-hidden', 'true');
     artwork.append(element('span', event.day.slice(8), 'cover-day'));
-    button.append(dateLabel, artwork, element('span', event.title, 'card-title'));
+    button.append(dateLabel, artwork, element('span', event.title, 'card-title'), byId('selection-ink').content.cloneNode(true));
     row.append(button);
     return row;
   }));

@@ -9,6 +9,32 @@ export function mountDeck(rail, track) {
   let drag = null;
   let suppressClick = false;
   let touchSnap;
+  let tiltedCard = null;
+
+  function tiltCard(card, event) {
+    if (tiltedCard !== card) {
+      tiltedCard?.style.removeProperty('--tilt-x');
+      tiltedCard?.style.removeProperty('--tilt-y');
+      tiltedCard = card;
+    }
+    if (!card) return;
+    const bounds = card.parentElement.getBoundingClientRect();
+    const horizontal = Math.max(-1, Math.min(1, (event.clientX - bounds.left) / bounds.width * 2 - 1));
+    const vertical = Math.max(-1, Math.min(1, (event.clientY - bounds.top) / bounds.height * 2 - 1));
+    card.style.setProperty('--tilt-x', (-vertical * 14).toFixed(2) + 'deg');
+    card.style.setProperty('--tilt-y', (horizontal * 17).toFixed(2) + 'deg');
+  }
+
+  rail.addEventListener('pointermove', event => {
+    if (event.pointerType !== 'mouse' || reducedMotion.matches || drag) return;
+    tiltCard(event.target.closest('.stop')?.firstElementChild ?? null, event);
+  }, { passive: true });
+  rail.addEventListener('pointerleave', () => tiltCard(null));
+  rail.addEventListener('pointerout', event => {
+    if (tiltedCard && !tiltedCard.parentElement?.contains(event.relatedTarget)) tiltCard(null);
+  });
+  rail.addEventListener('pointerdown', () => tiltCard(null));
+  reducedMotion.addEventListener('change', () => tiltCard(null));
 
   function schedule() {
     if (!frame) frame = requestAnimationFrame(draw);
