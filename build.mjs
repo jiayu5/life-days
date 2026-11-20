@@ -12,7 +12,12 @@ const files = {
 const assets = Object.fromEntries(await Promise.all(Object.entries(files).map(async ([path, [file, type]]) => [
   path, { type: type + '; charset=utf-8', body: await readFile(file, 'utf8') },
 ])));
-for (const [file, type] of [['paper-grain.png', 'image/png'], ['bodoni-moda-digits.woff2', 'font/woff2']]) {
+const binaryFiles = [
+  ['paper-grain.png', 'image/png'],
+  ['bodoni-moda-digits.woff2', 'font/woff2'],
+  ['big-days-icon.png', 'image/png'],
+];
+for (const [file, type] of binaryFiles) {
   assets['/' + file] = { type, base64: (await readFile(file)).toString('base64') };
 }
 const worker = await readFile('worker.js', 'utf8');
