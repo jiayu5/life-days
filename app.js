@@ -1,4 +1,4 @@
-import { today, duration } from './dates.js';
+import { today, dayNumber, duration } from './dates.js';
 import { mountDeck } from './deck.js';
 import { attachInk } from './ink.js';
 
@@ -165,6 +165,7 @@ function palette(event) {
 
 function render() {
   const date = today();
+  const currentDay = dayNumber(date);
   const stops = [...events].sort((a, b) => a.day.localeCompare(b.day));
   const oldFocus = [...markerButtons].find(([, button]) => button === document.activeElement)?.[0];
   markerButtons = new Map();
@@ -181,10 +182,16 @@ function render() {
 
     const dateLabel = element('time', event.day.replaceAll('-', '.'));
     dateLabel.dateTime = event.day;
-    const artwork = element('span', '', 'cover-art');
-    artwork.setAttribute('aria-hidden', 'true');
-    artwork.append(element('span', event.day.slice(8), 'cover-day'));
-    button.append(dateLabel, artwork, element('span', event.title, 'card-title'), byId('selection-ink').content.cloneNode(true));
+    const days = currentDay - dayNumber(event.day);
+    const count = number.format(Math.abs(days));
+    const elapsed = element('span', '', 'card-elapsed');
+    elapsed.style.setProperty('--count-length', String(count.length));
+    elapsed.append(
+      element('span', days < 0 ? '还有' : '已过'),
+      element('strong', count, 'card-count'),
+      element('span', '天'),
+    );
+    button.append(dateLabel, elapsed, element('span', event.title, 'card-title'), byId('selection-ink').content.cloneNode(true));
     row.append(button);
     attachInk(button, event.id);
     return row;

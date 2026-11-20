@@ -105,8 +105,8 @@ a { color: inherit; text-decoration: none }
 .rail.dragging, .rail.dragging .day-card { cursor: grabbing }
 .rail { user-select: none }
 .day-card {
-  text-align: center; color: var(--print); position: relative; width: 100%; height: 100%; display: flex; flex-direction: column;
-  justify-content: space-between; gap: 9px; padding: 14% 8% 13%;
+  text-align: center; color: var(--print); position: relative; width: 100%; height: 100%; display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 12% 8% 10%;
   border: 1px solid #b5a48a; border-radius: 3px;
   background: url("/paper-grain.png") 0 0 / 243px 243px,
     radial-gradient(ellipse at 17% 9%, #fbf2df, #e9d8bc 96%);
@@ -129,17 +129,17 @@ a { color: inherit; text-decoration: none }
 .day-card time { font: 400 clamp(14px, 1.55vw, 22px)/1.15 Georgia, serif; font-variant-numeric: lining-nums; letter-spacing: .06em }
 .card-title {
   font-family: "Songti SC", "Noto Serif CJK SC", SimSun, serif; font-size: clamp(17px, 2.15vw, 30px); line-height: 1.16; font-weight: 650; letter-spacing: .045em;
+  border-top: 1px solid #8d735451; padding-top: .5em;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere;
 }
-.cover-art {
-  display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; flex: 1; min-height: 0; overflow: hidden; color: var(--print);
+.card-elapsed {
+  display: grid; justify-items: center; gap: 6px; color: #654137;
+  font: 500 clamp(13px, 1.35vw, 16px)/1.2 "PingFang SC", "Microsoft YaHei", sans-serif;
 }
-.cover-day {
-  font: 600 calc(var(--card-width) * .71)/.89 "Bodoni Moda", Didot, "Bodoni 72", "Times New Roman", serif;
-  font-variant-numeric: lining-nums tabular-nums;
-  text-shadow: 0 1px #442f2033;
-  letter-spacing: -.095em; padding-inline-end: .08em;
-  transition: transform .55s cubic-bezier(.19,1,.22,1);
+.card-count {
+  font: 600 min(calc(var(--card-width) * .23), calc(var(--card-width) * 1.32 / var(--count-length)))/1 Georgia, serif;
+  font-variant-numeric: lining-nums tabular-nums; letter-spacing: -.07em;
+  color: #352720; white-space: nowrap;
 }
 .selection-ink {
   --ink-clearance: 28px;
@@ -206,10 +206,10 @@ textarea { resize: vertical }
   #detail-title { font-size: clamp(43px, 11vw, 72px) }
 }
 @media (max-height: 450px) {
-  .cover-day { font-size: calc(var(--card-width) * .63) }
+  .card-elapsed { gap: 2px; font-size: 12px }
+  .card-count { font-size: min(calc(var(--card-width) * .19), calc(var(--card-width) * 1.15 / var(--count-length))) }
   .day-card { padding: 10% 9%; gap: 4px }
   .card-title { font-size: clamp(14px, 6dvh, 23px) }
-  .record-label { font-size: clamp(15px, 7dvh, 30px) }
 }
 @media (prefers-reduced-motion: reduce) {
   .stop:hover .day-card, .stop:focus-within .day-card:focus-visible { transform: none }
