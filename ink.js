@@ -70,37 +70,34 @@ export function attachInk(card, id) {
   let frame = 0;
   let start;
   let hovered = false;
-  let focused = false;
 
   function paint(time) {
     frame = 0;
-    if (!card.isConnected || (!hovered && !focused)) return;
+    if (!card.isConnected || !hovered) return;
     sampled ??= sampleStroke(paths[0], random);
     start ??= time;
     const progress = reducedMotion.matches ? 0 : (time - start) / duration;
     strokes.forEach(({ span, offset, lane, weight, grain }, i) => {
       paths[i].setAttribute('d', brushOutline(sampled, phase + progress + offset, span, lane, weight, grain));
     });
-    card.classList.add('ink-ready');
+    card.classList.add('ink-active');
     if (!reducedMotion.matches) frame = requestAnimationFrame(paint);
   }
 
-  function update() {
-    if (hovered || focused) {
-      if (!frame) frame = requestAnimationFrame(paint);
-    } else {
-      cancelAnimationFrame(frame);
-      frame = 0;
-      start = undefined;
-    }
+  function stopInk() {
+    hovered = false;
+    cancelAnimationFrame(frame);
+    frame = 0;
+    start = undefined;
+    card.classList.remove('ink-active');
   }
 
-  row.addEventListener('pointerenter', event => {
-    if (event.pointerType !== 'mouse') return;
+  row.addEventListener('pointermove', event => {
+    if (event.pointerType !== 'mouse' || event.buttons || hovered) return;
     hovered = true;
-    update();
-  });
-  row.addEventListener('pointerleave', () => { hovered = false; update(); });
-  card.addEventListener('focus', () => { focused = card.matches(':focus-visible'); update(); });
-  card.addEventListener('blur', () => { focused = false; update(); });
+    frame = requestAnimationFrame(paint);
+  }, { passive: true });
+  row.addEventListener('pointerleave', stopInk);
+  row.addEventListener('pointercancel', stopInk);
+  card.addEventListener('click', stopInk, { capture: true });
 }
