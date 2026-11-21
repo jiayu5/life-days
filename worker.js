@@ -5,6 +5,7 @@ const json = (value, status = 200) => Response.json(value, { status, headers: { 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname.startsWith('/api/auth/')) return handleAuth(request, env, url);
     if (url.pathname !== '/api/events') {
       const asset = Object.hasOwn(assets, url.pathname) ? assets[url.pathname] : null;
       if (!asset) return new Response('页面不存在', { status: 404 });
@@ -14,11 +15,12 @@ export default {
       });
     }
 
-    const owner = request.headers.get('oai-authenticated-user-id');
-    if (!owner) return json({ error: 'Sign in required' }, 401);
+    const identity = await ownerForRequest(request, env);
+    if (!identity) return json({ error: 'Sign in required' }, 401);
+    const owner = identity.id;
     if (request.method === 'GET') {
       const { results } = await env.DB.prepare('SELECT id, title, day, note FROM events WHERE owner = ?').bind(owner).all();
-      if (!results.some(event => event.id === 'birthday')) results.push(defaultBirthday);
+      if (identity.isPrimary && !results.some(event => event.id === 'birthday')) results.push(defaultBirthday);
       return json(results.filter(event => event.title !== ''));
     }
     if (request.method !== 'PUT' && request.method !== 'DELETE') return json({ error: 'Method not allowed' }, 405);

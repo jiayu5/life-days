@@ -214,3 +214,20 @@ textarea { resize: vertical }
   .stop:hover .day-card, .stop:focus-within .day-card:focus-visible { transform: none }
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important }
 }
+
+.mast-actions { display: flex; align-items: center; gap: 8px }
+.login-panel {
+  position: absolute; z-index: 2; inset: 50% auto auto 50%; transform: translate(-50%, -50%);
+  width: min(370px, calc(100% - 32px)); max-height: calc(100% - 100px); overflow: auto;
+  padding: clamp(20px, 5vw, 32px);
+  background: url("/paper-grain.png") 0 0 / 243px 243px, linear-gradient(140deg, #fbf2df, #e9d8bc);
+  color: #28231e; border: 1px solid #b5a48a; border-radius: 3px;
+  box-shadow: 10px 14px 28px #4c392933;
+}
+.login-panel h1 { margin: 0 0 16px; font: 650 clamp(23px, 5vw, 28px)/1.2 "Songti SC", SimSun, Georgia, serif }
+.login-panel form { display: grid; gap: 7px; margin-top: 12px }
+.login-panel label { margin: 0 }
+.login-panel input { margin: 0; border-color: #9c8870 }
+.login-panel .primary { margin-left: 0; width: 100%; background: #62352c; border-color: #62352c }
+#login-message { margin: 12px 0 0; color: #62352c; font-size: 14px }
+#login-message:empty { display: none }

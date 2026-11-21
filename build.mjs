@@ -20,6 +20,7 @@ const binaryFiles = [
 for (const [file, type] of binaryFiles) {
   assets['/' + file] = { type, base64: (await readFile(file)).toString('base64') };
 }
+const auth = await readFile('auth.js', 'utf8');
 const worker = await readFile('worker.js', 'utf8');
 await mkdir('dist/server', { recursive: true });
-await writeFile('dist/server/index.js', worker.replace('ASSET_MAP', () => JSON.stringify(assets)));
+await writeFile('dist/server/index.js', auth + '\n' + worker.replace('ASSET_MAP', () => JSON.stringify(assets)));

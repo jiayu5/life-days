@@ -8,6 +8,15 @@ const form = byId('event-form');
 const deleteButton = byId('delete');
 const submit = form.querySelector('[type="submit"]');
 const number = new Intl.NumberFormat('zh-CN');
+const addEventButton = byId('add-event');
+const loginPanel = byId('login-panel');
+const requestCodeForm = byId('request-code');
+const verifyCodeForm = byId('verify-code');
+const loginEmail = byId('login-email');
+const loginMessage = byId('login-message');
+const logout = byId('logout');
+let emailLogin = false;
+let requestedEmail = '';
 let events = [];
 let editing = null;
 let busy = false;
@@ -17,9 +26,83 @@ async function api(method = 'GET', data) {
     method, headers: data ? { 'Content-Type': 'application/json' } : undefined,
     body: data ? JSON.stringify(data) : undefined,
   });
-  if (!response.ok) throw new Error(response.status === 401 ? '请用站主的 ChatGPT 账号登录后重试。' : '暂时无法连接，请稍后重试。');
+  if (response.status === 401 && emailLogin) showLogin();
+  if (!response.ok) throw new Error(response.status === 401 ? '请登录后重试。' : '暂时无法连接，请稍后重试。');
   return response.json();
 }
+
+async function authApi(path, data) {
+  const response = await fetch('/api/auth/' + path, data ? {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  } : undefined);
+  const result = await response.json();
+  if (!response.ok) throw new Error(result.error || '暂时无法连接，请稍后重试。');
+  return result;
+}
+
+function showLogin() {
+  events = [];
+  lastDate = undefined;
+  track.replaceChildren();
+  byId('status').hidden = true;
+  addEventButton.hidden = true;
+  logout.hidden = true;
+  loginPanel.hidden = false;
+  verifyCodeForm.hidden = true;
+  loginMessage.textContent = '';
+  if (dialog.open) dialog.close();
+  if (detail.open) closeDetail();
+}
+
+async function submitAuth(form, action) {
+  const button = form.querySelector('button[type="submit"]');
+  button.disabled = true;
+  loginMessage.textContent = '';
+  try {
+    await action();
+  } catch (error) {
+    loginMessage.textContent = error.message;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+requestCodeForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const email = loginEmail.value.trim();
+  submitAuth(requestCodeForm, async () => {
+    await authApi('request', { email });
+    requestedEmail = email;
+    verifyCodeForm.hidden = false;
+    verifyCodeForm.reset();
+    byId('login-code').focus();
+    loginMessage.textContent = '验证码已发送，有效期为 10 分钟。';
+  });
+});
+loginEmail.addEventListener('input', () => {
+  verifyCodeForm.hidden = true;
+  loginMessage.textContent = '';
+});
+verifyCodeForm.addEventListener('submit', event => {
+  event.preventDefault();
+  submitAuth(verifyCodeForm, async () => {
+    await authApi('verify', { email: requestedEmail, code: byId('login-code').value });
+    location.reload();
+  });
+});
+logout.addEventListener('click', async () => {
+  logout.disabled = true;
+  try {
+    await authApi('logout', {});
+    location.reload();
+  } catch {
+    logout.disabled = false;
+    byId('status').textContent = '退出失败，请重试。';
+    byId('status').hidden = false;
+  }
+});
 
 function element(tag, value, className) {
   const node = document.createElement(tag);
@@ -113,7 +196,7 @@ function showDetail(event) {
 }
 
 function closeDetail() {
-  const target = markerButtons.get(activeId) || document.querySelector('.add');
+  const target = markerButtons.get(activeId) || addEventButton;
   detail.close();
   reveal?.cancel();
   reveal = null;
@@ -210,9 +293,10 @@ async function load() {
   try {
     events = await api();
     render();
-    document.querySelectorAll('.add').forEach(button => { button.disabled = false; });
+    addEventButton.disabled = false;
     return true;
   } catch (error) {
+    if (!loginPanel.hidden) return false;
     const retry = element('button', '重试', 'retry');
     retry.addEventListener('click', load);
     byId('status').replaceChildren(error.message + ' ', retry);
@@ -238,7 +322,7 @@ async function persist(method, data) {
   }
 }
 
-document.querySelectorAll('.add').forEach(button => button.addEventListener('click', () => edit()));
+addEventButton.addEventListener('click', () => edit());
 dialog.querySelector('.close').addEventListener('click', () => { if (!busy) dialog.close(); });
 dialog.addEventListener('cancel', event => { if (busy) event.preventDefault(); });
 form.addEventListener('submit', event => {
@@ -255,8 +339,21 @@ deleteButton.addEventListener('click', () => {
   if (window.confirm('确定删除这个日子吗？')) persist('DELETE', { id: editing.id });
 });
 let lastDate;
-let loaded = await load();
+let loaded = false;
+try {
+  const status = await authApi('status');
+  emailLogin = status.enabled;
+  if (emailLogin && !status.authenticated) {
+    showLogin();
+  } else {
+    logout.hidden = !emailLogin;
+    loaded = await load();
+  }
+} catch {
+  byId('status').textContent = '暂时无法加载，请刷新后重试。';
+  byId('status').hidden = false;
+}
 setInterval(() => { if (lastDate && today() !== lastDate) render(); }, 30000);
 document.addEventListener('visibilitychange', async () => {
-  if (!document.hidden && !dialog.open && !busy && (lastDate || !loaded)) loaded = await load();
+  if (!document.hidden && loginPanel.hidden && !dialog.open && !busy && (lastDate || !loaded)) loaded = await load();
 });

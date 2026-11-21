@@ -12,10 +12,24 @@
 <body>
 <header class="mast">
 <a href="/" class="wordmark" lang="en"><img src="/big-days-icon.png" width="33" height="33" alt="">Big Days</a>
-<button class="add" type="button" lang="en" aria-label="Add a day" disabled><span aria-hidden="true">+</span> Add</button>
+<div class="mast-actions"><button id="logout" class="add" type="button" hidden>退出登录</button><button class="add" id="add-event" type="button" lang="en" aria-label="Add a day" disabled><span aria-hidden="true">+</span> Add</button></div>
 </header>
 <main class="timeline-stage" aria-label="Big Days">
 <div class="gallery-wall" aria-hidden="true"><div class="gallery-year"><span id="year-out"></span><span id="year-in"></span></div></div>
+<section id="login-panel" class="login-panel" aria-labelledby="login-title" hidden>
+  <h1 id="login-title">登录 Big Days</h1>
+  <form id="request-code">
+    <label for="login-email">邮箱</label>
+    <input id="login-email" name="email" type="email" autocomplete="email" maxlength="254" required>
+    <button class="primary" type="submit">发送验证码</button>
+  </form>
+  <form id="verify-code" hidden>
+    <label for="login-code">验证码</label>
+    <input id="login-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required>
+    <button class="primary" type="submit">登录</button>
+  </form>
+  <p id="login-message" role="status"></p>
+</section>
 <div id="rail" class="rail" tabindex="0" aria-label="按日期排列的纪念日，可左右滚动">
 <ol id="events" class="track"></ol>
 </div>
