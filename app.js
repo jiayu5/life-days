@@ -8,6 +8,8 @@ const form = byId('event-form');
 const deleteButton = byId('delete');
 const submit = form.querySelector('[type="submit"]');
 const number = new Intl.NumberFormat('zh-CN');
+const weekdayFormat = new Intl.DateTimeFormat('zh-CN', { weekday: 'long', timeZone: 'UTC' });
+const weekday = day => weekdayFormat.format(new Date(day + 'T00:00:00Z'));
 const addEventButton = byId('add-event');
 const loginPanel = byId('login-panel');
 const requestCodeForm = byId('request-code');
@@ -166,8 +168,9 @@ function fillDetail(event) {
   const elapsed = duration(event.day, today());
   byId('detail-year').textContent = event.day.slice(0, 4);
   detail.dataset.palette = String(palette(event));
+  detail.classList.toggle('future', elapsed.difference < 0);
   byId('detail-date').dateTime = event.day;
-  byId('detail-date').textContent = event.day.replaceAll('-', '.');
+  byId('detail-date').textContent = event.day.replaceAll('-', '.') + '　' + weekday(event.day);
   byId('detail-title').textContent = event.title;
   byId('detail-note').textContent = event.note;
   byId('detail-note').hidden = !event.note;
@@ -267,6 +270,7 @@ function render() {
     dateLabel.dateTime = event.day;
     const days = currentDay - dayNumber(event.day);
     const count = number.format(Math.abs(days));
+    row.classList.toggle('future', days < 0);
     const elapsed = element('span', '', 'card-elapsed');
     elapsed.style.setProperty('--count-length', String(count.length));
     elapsed.append(
@@ -274,7 +278,9 @@ function render() {
       element('strong', count, 'card-count'),
       element('span', '天'),
     );
-    button.append(dateLabel, elapsed, element('span', event.title, 'card-title'), byId('selection-ink').content.cloneNode(true));
+    const head = element('span', '', 'card-head');
+    head.append(dateLabel, element('span', weekday(event.day), 'card-week'));
+    button.append(head, elapsed, element('span', event.title, 'card-title'), byId('selection-ink').content.cloneNode(true));
     row.append(button);
     attachInk(button, event.id);
     return row;
